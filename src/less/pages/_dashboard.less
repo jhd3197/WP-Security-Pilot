@@ -1,6 +1,6 @@
 .card-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
 }
 
@@ -94,4 +94,34 @@
 .status-subtitle {
     color: var(--color-muted);
     font-size: 13px;
+}
+
+.stat-list {
+    display: grid;
+    gap: 12px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+}
+
+.progress-bar.compact {
+    height: 6px;
+    margin-top: 12px;
+}
+
+@media (max-width: 1200px) {
+    .card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .card-grid {
+        grid-template-columns: 1fr;
+    }
 }

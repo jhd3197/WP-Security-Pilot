@@ -49,7 +49,8 @@ class WP_Security_Pilot_Scanner {
             array( '%d' )
         );
 
-        wp_schedule_single_event( time() + 5, 'wpsp_scan_chunk', array( $job_id ) );
+        wp_schedule_single_event( time() + 1, 'wpsp_scan_chunk', array( $job_id ) );
+        $this->kick_cron();
 
         if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
             $label = ( 'scheduled' === $initiator ) ? 'Scheduled scan started' : 'Manual scan started';
@@ -67,9 +68,27 @@ class WP_Security_Pilot_Scanner {
             return;
         }
 
+        $lock_key = $this->get_lock_key( $job_id );
+        if ( get_transient( $lock_key ) ) {
+            return;
+        }
+
+        set_transient( $lock_key, 1, MINUTE_IN_SECONDS );
+
+        try {
         $job = $this->get_job( $job_id );
         if ( ! $job || in_array( $job['status'], array( 'completed', 'stopped' ), true ) ) {
             return;
+        }
+
+        if ( 'pending' === $job['status'] ) {
+            $wpdb->update(
+                $wpdb->prefix . 'wpsp_scan_jobs',
+                array( 'status' => 'running' ),
+                array( 'id' => $job_id ),
+                array( '%s' ),
+                array( '%d' )
+            );
         }
 
         $queue_key = $this->get_queue_option_key( $job_id );
@@ -133,6 +152,9 @@ class WP_Security_Pilot_Scanner {
         }
 
         wp_schedule_single_event( time() + 5, 'wpsp_scan_chunk', array( $job_id ) );
+        } finally {
+            delete_transient( $lock_key );
+        }
     }
 
     public function stop_scan( $job_id ) {
@@ -177,6 +199,10 @@ class WP_Security_Pilot_Scanner {
         $job = $this->get_job( $job_id );
         if ( ! $job ) {
             return null;
+        }
+
+        if ( in_array( $job['status'], array( 'pending', 'running' ), true ) ) {
+            $this->maybe_run_inline_chunk( $job_id );
         }
 
         $progress = 0;
@@ -642,6 +668,58 @@ class WP_Security_Pilot_Scanner {
         return 'wpsp_scan_config_' . absint( $job_id );
     }
 
+    private function ensure_scan_is_scheduled( $job_id ) {
+        $job_id = absint( $job_id );
+        if ( ! $job_id ) {
+            return;
+        }
+
+        if ( wp_next_scheduled( 'wpsp_scan_chunk', array( $job_id ) ) ) {
+            return;
+        }
+
+        $queue = get_option( $this->get_queue_option_key( $job_id ), array() );
+        if ( empty( $queue ) || ! is_array( $queue ) ) {
+            return;
+        }
+
+        wp_schedule_single_event( time() + 5, 'wpsp_scan_chunk', array( $job_id ) );
+        $this->kick_cron();
+    }
+
+    private function maybe_run_inline_chunk( $job_id ) {
+        $queue = get_option( $this->get_queue_option_key( $job_id ), array() );
+        if ( empty( $queue ) || ! is_array( $queue ) ) {
+            return;
+        }
+
+        $next_scheduled = wp_next_scheduled( 'wpsp_scan_chunk', array( $job_id ) );
+        $cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+        $overdue = $next_scheduled && $next_scheduled <= ( time() - 5 );
+
+        if ( ! $cron_disabled && $next_scheduled && ! $overdue ) {
+            return;
+        }
+
+        $throttle_key = 'wpsp_scan_inline_' . absint( $job_id );
+        if ( get_transient( $throttle_key ) ) {
+            return;
+        }
+
+        set_transient( $throttle_key, 1, 3 );
+        $this->run_scan_chunk( $job_id );
+    }
+
+    private function kick_cron() {
+        if ( function_exists( 'spawn_cron' ) ) {
+            spawn_cron();
+            return;
+        }
+
+        $cron_url = site_url( 'wp-cron.php' );
+        wp_remote_post( $cron_url, array( 'timeout' => 3, 'blocking' => false ) );
+    }
+
     private function get_scan_config_defaults() {
         return array(
             'scan_intensity'     => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'scan_intensity' ), 'medium' ),
@@ -671,5 +749,9 @@ class WP_Security_Pilot_Scanner {
         }
 
         return $target->getTimestamp();
+    }
+
+    private function get_lock_key( $job_id ) {
+        return 'wpsp_scan_lock_' . absint( $job_id );
     }
 }
