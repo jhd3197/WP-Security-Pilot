@@ -32,12 +32,27 @@ body[class*="wp-security-pilot"] #wpbody-content {
     --shadow-soft: 0 16px 40px rgba(24, 35, 46, 0.08);
     color: var(--color-text);
     font-family: "Space Grotesk", "Segoe UI", sans-serif;
-    padding: 24px;
+    padding: 20px;
     min-height: 100vh;
     box-sizing: border-box;
     background: radial-gradient(circle at top left, rgba(34, 113, 177, 0.08), transparent 45%),
         radial-gradient(circle at top right, rgba(46, 125, 50, 0.06), transparent 40%),
         #f5f7fb;
+}
+
+body.admin-bar .wp-security-pilot-admin {
+    min-height: calc(100vh - 32px);
+}
+
+@media (max-width: 782px) {
+    body.admin-bar .wp-security-pilot-admin {
+        min-height: calc(100vh - 46px);
+    }
+}
+
+.wp-security-pilot-shell {
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 .wp-security-pilot-admin *,

@@ -147,9 +147,11 @@ const App = ({ initialView = 'dashboard' }) => {
 
     return (
         <div className="wp-security-pilot-admin">
-            <Header currentView={currentView} onNavigate={handleNavigate} />
-            <div className="content-area">
-                {renderView()}
+            <div className="wp-security-pilot-shell">
+                <Header currentView={currentView} onNavigate={handleNavigate} />
+                <div className="content-area">
+                    {renderView()}
+                </div>
             </div>
         </div>
     );
