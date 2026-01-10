@@ -12,7 +12,7 @@
     "security",
     "react"
   ],
-  "author": "Your Name",
+  "author": "Juan Denis",
   "license": "GPL-2.0+",
   "devDependencies": {
     "@wordpress/scripts": "^27.6.0"
