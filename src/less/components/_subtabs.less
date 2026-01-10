@@ -1,0 +1,21 @@
+.sub-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sub-tab {
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    padding: 8px 14px;
+    border-radius: @radius-md;
+    color: var(--color-muted);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.sub-tab.is-active {
+    color: var(--color-primary);
+    border-color: @color-primary-border-strong;
+    background: @color-primary-light;
+}

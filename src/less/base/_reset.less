@@ -1,0 +1,60 @@
+.wp-security-pilot-admin button,
+.wp-security-pilot-admin input {
+    font-family: inherit;
+}
+
+body[class*="wp-security-pilot"] #wpcontent {
+    padding-left: 0;
+    min-height: 0;
+}
+
+body[class*="wp-security-pilot"] #wpwrap {
+    background: @color-bg;
+}
+
+body[class*="wp-security-pilot"] #wpbody-content {
+    padding-bottom: 0;
+}
+
+.wp-security-pilot-admin {
+    --color-primary: @color-primary;
+    --color-primary-strong: @color-primary-strong;
+    --color-surface: @color-surface;
+    --color-surface-muted: @color-surface-muted;
+    --color-border: @color-border;
+    --color-text: @color-text;
+    --color-muted: @color-muted;
+    --color-success: @color-success;
+    --color-warning: @color-warning;
+    --color-danger: @color-danger;
+    --shadow-soft: @shadow-soft;
+    color: var(--color-text);
+    font-family: @font-base;
+    padding: 20px;
+    min-height: 100vh;
+    box-sizing: border-box;
+    background: radial-gradient(circle at top left, rgba(34, 113, 177, 0.08), transparent 45%),
+        radial-gradient(circle at top right, rgba(46, 125, 50, 0.06), transparent 40%),
+        @color-bg;
+}
+
+body.admin-bar .wp-security-pilot-admin {
+    min-height: calc(100vh - 32px);
+}
+
+@media (max-width: 782px) {
+    body.admin-bar .wp-security-pilot-admin {
+        min-height: calc(100vh - 46px);
+    }
+}
+
+.wp-security-pilot-shell {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.wp-security-pilot-admin *,
+.wp-security-pilot-admin *::before,
+.wp-security-pilot-admin *::after {
+    box-sizing: border-box;
+}

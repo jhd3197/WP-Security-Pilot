@@ -13,6 +13,10 @@ class WP_Security_Pilot_Admin_Loader {
 
     public function __construct() {
         require_once plugin_dir_path( __FILE__ ) . 'Api/class-settings-controller.php';
+        require_once plugin_dir_path( __FILE__ ) . 'Api/class-firewall-controller.php';
+        require_once plugin_dir_path( __FILE__ ) . 'Api/class-activity-controller.php';
+        require_once plugin_dir_path( __FILE__ ) . 'Api/class-hardening-controller.php';
+        require_once plugin_dir_path( __FILE__ ) . 'Api/class-scanner-controller.php';
     }
 
     public function run() {
@@ -24,6 +28,18 @@ class WP_Security_Pilot_Admin_Loader {
     public function register_api_routes() {
         $settings_controller = new WP_Security_Pilot_Settings_Controller();
         $settings_controller->register_routes();
+
+        $firewall_controller = new WP_Security_Pilot_Firewall_Controller();
+        $firewall_controller->register_routes();
+
+        $activity_controller = new WP_Security_Pilot_Activity_Controller();
+        $activity_controller->register_routes();
+
+        $hardening_controller = new WP_Security_Pilot_Hardening_Controller();
+        $hardening_controller->register_routes();
+
+        $scanner_controller = new WP_Security_Pilot_Scanner_Controller();
+        $scanner_controller->register_routes();
     }
 
 

@@ -1,0 +1,109 @@
+.pilot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    align-items: stretch;
+}
+
+.pilot-card {
+    border: 1px solid var(--color-border);
+    border-radius: @radius-xl;
+    padding: 22px;
+    min-height: 240px;
+    width: 100%;
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: @shadow-card;
+    overflow: hidden;
+}
+
+.pilot-card.active {
+    border-color: @color-primary-highlight;
+    box-shadow: @shadow-elevated;
+}
+
+.pilot-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.pilot-card-identity {
+    .flex-align-center();
+    gap: 12px;
+    min-width: 0;
+    flex: 1;
+}
+
+.pilot-card-mark {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    .inline-flex-center();
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.pilot-card-mark.security {
+    background: @color-success;
+}
+
+.pilot-card-mark.seo {
+    background: #3ca86a;
+}
+
+.pilot-card-mark svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+    display: block;
+}
+
+.pilot-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.pilot-card-tagline {
+    margin: 4px 0 0;
+    font-size: 12px;
+    color: var(--color-muted);
+}
+
+.pilot-card-head h3 {
+    margin: 0 0 4px;
+}
+
+.pilot-card-desc {
+    margin: 0;
+    color: var(--color-muted);
+}
+
+.pilot-card-meta {
+    .flex-align-center();
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: auto;
+}
+
+.pilot-card-head .toggle {
+    flex-shrink: 0;
+}
+
+@media (max-width: 1200px) {
+    .pilot-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+    .pilot-grid {
+        grid-template-columns: 1fr;
+    }
+}
