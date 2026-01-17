@@ -1,13 +1,13 @@
 <?php
 
-class WP_Security_Pilot_Activity_Logger {
+class Saman_Security_Activity_Logger {
     public static function log_event( $type, $message, $user_id = 0, $ip_address = '', $user_name = '' ) {
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
             return;
         }
 
         global $wpdb;
-        $table_name = $wpdb->prefix . 'wpsp_activity_log';
+        $table_name = $wpdb->prefix . 'ss_activity_log';
 
         $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
         if ( $table_exists !== $table_name ) {
@@ -27,8 +27,8 @@ class WP_Security_Pilot_Activity_Logger {
         }
 
         $ip_address = $ip_address ? self::sanitize_ip( $ip_address ) : self::get_client_ip();
-        if ( class_exists( 'WP_Security_Pilot_Settings' ) ) {
-            $ip_address = WP_Security_Pilot_Settings::anonymize_ip( $ip_address );
+        if ( class_exists( 'Saman_Security_Settings' ) ) {
+            $ip_address = Saman_Security_Settings::anonymize_ip( $ip_address );
         }
 
         $wpdb->insert(

@@ -1,7 +1,7 @@
 <?php
 
-class WP_Security_Pilot_Settings {
-    const OPTION_KEY = 'wp_security_pilot_settings';
+class Saman_Security_Settings {
+    const OPTION_KEY = 'saman_security_settings';
 
     public static function get_defaults() {
         return array(
@@ -29,13 +29,19 @@ class WP_Security_Pilot_Settings {
                     'on_malware_found'     => true,
                     'on_core_file_modified'=> true,
                     'on_admin_login'       => false,
+                    'on_user_login'        => false,
                 ),
                 'weekly_summary_enabled' => true,
+                'weekly_summary_day'     => 'monday',
+                'weekly_summary_time'    => '09:00',
             ),
             'integrations'  => array(
                 'slack' => array(
                     'webhook_url' => '',
                 ),
+            ),
+            'analytics'    => array(
+                'enabled' => true,
             ),
             'api_keys'    => array(),
             'updated_at'  => '',
@@ -73,6 +79,7 @@ class WP_Security_Pilot_Settings {
         $scanner = self::merge_section( $defaults['scanner'], $existing, $settings, 'scanner' );
         $notifications = self::merge_section( $defaults['notifications'], $existing, $settings, 'notifications' );
         $integrations = self::merge_section( $defaults['integrations'], $existing, $settings, 'integrations' );
+        $analytics = self::merge_section( $defaults['analytics'], $existing, $settings, 'analytics' );
 
         $general_sanitized = array(
             'ip_anonymization'        => self::normalize_bool( $general, 'ip_anonymization', $defaults['general']['ip_anonymization'] ),
@@ -102,6 +109,17 @@ class WP_Security_Pilot_Settings {
         $recipient_email = isset( $notifications['recipient_email'] ) ? sanitize_email( $notifications['recipient_email'] ) : '';
         $alerts = isset( $notifications['alerts'] ) && is_array( $notifications['alerts'] ) ? $notifications['alerts'] : array();
 
+        $weekly_day = isset( $notifications['weekly_summary_day'] ) ? sanitize_key( $notifications['weekly_summary_day'] ) : $defaults['notifications']['weekly_summary_day'];
+        $valid_days = array( 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday' );
+        if ( ! in_array( $weekly_day, $valid_days, true ) ) {
+            $weekly_day = $defaults['notifications']['weekly_summary_day'];
+        }
+
+        $weekly_time = isset( $notifications['weekly_summary_time'] ) ? sanitize_text_field( $notifications['weekly_summary_time'] ) : $defaults['notifications']['weekly_summary_time'];
+        if ( ! preg_match( '/^\d{2}:\d{2}$/', $weekly_time ) ) {
+            $weekly_time = $defaults['notifications']['weekly_summary_time'];
+        }
+
         $notifications_sanitized = array(
             'recipient_email'        => $recipient_email,
             'alerts'                 => array(
@@ -109,8 +127,11 @@ class WP_Security_Pilot_Settings {
                 'on_malware_found'      => self::normalize_bool( $alerts, 'on_malware_found', $defaults['notifications']['alerts']['on_malware_found'] ),
                 'on_core_file_modified' => self::normalize_bool( $alerts, 'on_core_file_modified', $defaults['notifications']['alerts']['on_core_file_modified'] ),
                 'on_admin_login'        => self::normalize_bool( $alerts, 'on_admin_login', $defaults['notifications']['alerts']['on_admin_login'] ),
+                'on_user_login'         => self::normalize_bool( $alerts, 'on_user_login', $defaults['notifications']['alerts']['on_user_login'] ),
             ),
             'weekly_summary_enabled' => self::normalize_bool( $notifications, 'weekly_summary_enabled', $defaults['notifications']['weekly_summary_enabled'] ),
+            'weekly_summary_day'     => $weekly_day,
+            'weekly_summary_time'    => $weekly_time,
         );
 
         $slack = isset( $integrations['slack'] ) && is_array( $integrations['slack'] ) ? $integrations['slack'] : array();
@@ -120,12 +141,17 @@ class WP_Security_Pilot_Settings {
             ),
         );
 
+        $analytics_sanitized = array(
+            'enabled' => self::normalize_bool( $analytics, 'enabled', $defaults['analytics']['enabled'] ),
+        );
+
         return array(
             'general'       => $general_sanitized,
             'firewall'      => $firewall_sanitized,
             'scanner'       => $scanner_sanitized,
             'notifications' => $notifications_sanitized,
             'integrations'  => $integrations_sanitized,
+            'analytics'     => $analytics_sanitized,
             'updated_at'    => isset( $settings['updated_at'] ) ? sanitize_text_field( $settings['updated_at'] ) : '',
         );
     }
@@ -171,7 +197,7 @@ class WP_Security_Pilot_Settings {
             $label = 'API Key';
         }
 
-        $prefix = 'wpsp_live_' . substr( wp_generate_password( 6, false, false ), 0, 6 );
+        $prefix = 'ss_live_' . substr( wp_generate_password( 6, false, false ), 0, 6 );
         $secret = wp_generate_password( 32, false, false );
         $full_key = $prefix . '_' . $secret;
         $hash = hash_hmac( 'sha256', $full_key, wp_salt( 'auth' ) );

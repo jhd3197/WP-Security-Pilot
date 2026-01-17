@@ -35,26 +35,26 @@ jobs:
       - name: Extract version from plugin file
         id: get_version
         run: |
-          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" wp-security-pilot.php | head -1)
+          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" saman-security.php | head -1)
           ZIP_VERSION=$(echo $VERSION | sed 's/\./-/g')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "zip_version=$ZIP_VERSION" >> $GITHUB_OUTPUT
           echo "tag=v$VERSION" >> $GITHUB_OUTPUT
           echo "Extracted version: $VERSION"
 
-      - name: Sync WP_SECURITY_PILOT_VERSION constant
+      - name: Sync SAMAN_SECURITY_VERSION constant
         run: |
-          CURRENT_VERSION=$(grep -oP "define\( 'WP_SECURITY_PILOT_VERSION',\s*'\K[^']+" wp-security-pilot.php)
+          CURRENT_VERSION=$(grep -oP "define\( 'SAMAN_SECURITY_VERSION',\s*'\K[^']+" saman-security.php)
           if [ "$CURRENT_VERSION" != "${{ steps.get_version.outputs.version }}" ]; then
-            echo "Syncing WP_SECURITY_PILOT_VERSION from $CURRENT_VERSION to ${{ steps.get_version.outputs.version }}"
-            sed -i "s/define( 'WP_SECURITY_PILOT_VERSION', '[^']*' );/define( 'WP_SECURITY_PILOT_VERSION', '${{ steps.get_version.outputs.version }}' );/" wp-security-pilot.php
+            echo "Syncing SAMAN_SECURITY_VERSION from $CURRENT_VERSION to ${{ steps.get_version.outputs.version }}"
+            sed -i "s/define( 'SAMAN_SECURITY_VERSION', '[^']*' );/define( 'SAMAN_SECURITY_VERSION', '${{ steps.get_version.outputs.version }}' );/" saman-security.php
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add wp-security-pilot.php
-            git commit -m "chore: sync WP_SECURITY_PILOT_VERSION to ${{ steps.get_version.outputs.version }}"
+            git add saman-security.php
+            git commit -m "chore: sync SAMAN_SECURITY_VERSION to ${{ steps.get_version.outputs.version }}"
             git push
           else
-            echo "WP_SECURITY_PILOT_VERSION is already in sync with plugin header version"
+            echo "SAMAN_SECURITY_VERSION is already in sync with plugin header version"
           fi
 
       - name: Check if tag exists
@@ -74,12 +74,12 @@ jobs:
           VERSION=${{ steps.get_version.outputs.version }}
           NEW_VERSION=$(echo $VERSION | awk -F. '{print $1"."$2"."($3+1)}')
           # Update plugin header version
-          sed -i "s/^\(\s*\*\s*Version:\s*\)[0-9]\+\.[0-9]\+\.[0-9]\+/\1$NEW_VERSION/" wp-security-pilot.php
+          sed -i "s/^\(\s*\*\s*Version:\s*\)[0-9]\+\.[0-9]\+\.[0-9]\+/\1$NEW_VERSION/" saman-security.php
           # Update constant
-          sed -i "s/define( 'WP_SECURITY_PILOT_VERSION', '[^']*' );/define( 'WP_SECURITY_PILOT_VERSION', '$NEW_VERSION' );/" wp-security-pilot.php
+          sed -i "s/define( 'SAMAN_SECURITY_VERSION', '[^']*' );/define( 'SAMAN_SECURITY_VERSION', '$NEW_VERSION' );/" saman-security.php
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add wp-security-pilot.php
+          git add saman-security.php
           git commit -m "chore: bump version to $NEW_VERSION"
           git push
           echo "Bumped version to $NEW_VERSION"
@@ -88,7 +88,7 @@ jobs:
         if: steps.check_tag.outputs.exists == 'true'
         id: get_new_version
         run: |
-          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" wp-security-pilot.php | head -1)
+          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" saman-security.php | head -1)
           ZIP_VERSION=$(echo $VERSION | sed 's/\./-/g')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "zip_version=$ZIP_VERSION" >> $GITHUB_OUTPUT
@@ -121,27 +121,27 @@ jobs:
       - name: Create plugin zip
         run: |
           # Create temp directory for clean plugin
-          mkdir -p wp-security-pilot
+          mkdir -p saman-security
 
           # Copy only production files
-          cp -r assets wp-security-pilot/
-          cp -r includes wp-security-pilot/
-          cp -r languages wp-security-pilot/ 2>/dev/null || mkdir -p wp-security-pilot/languages
-          cp wp-security-pilot.php wp-security-pilot/
-          cp readme.txt wp-security-pilot/ 2>/dev/null || true
-          cp LICENSE wp-security-pilot/ 2>/dev/null || true
+          cp -r assets saman-security/
+          cp -r includes saman-security/
+          cp -r languages saman-security/ 2>/dev/null || mkdir -p saman-security/languages
+          cp saman-security.php saman-security/
+          cp readme.txt saman-security/ 2>/dev/null || true
+          cp LICENSE saman-security/ 2>/dev/null || true
 
           # Create the zip
-          zip -r wp-security-pilot-${{ steps.final_version.outputs.zip_version }}.zip wp-security-pilot
+          zip -r saman-security-${{ steps.final_version.outputs.zip_version }}.zip saman-security
 
           # Cleanup
-          rm -rf wp-security-pilot
+          rm -rf saman-security
 
-          echo "Created wp-security-pilot-${{ steps.final_version.outputs.zip_version }}.zip"
+          echo "Created saman-security-${{ steps.final_version.outputs.zip_version }}.zip"
 
           # List zip contents for verification
           echo "Zip contents:"
-          unzip -l wp-security-pilot-${{ steps.final_version.outputs.zip_version }}.zip | head -50
+          unzip -l saman-security-${{ steps.final_version.outputs.zip_version }}.zip | head -50
 
       - name: Prepare release notes
         id: release_notes
@@ -169,10 +169,10 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.final_version.outputs.tag }}
-          name: WP Security Pilot ${{ steps.final_version.outputs.version }}
+          name: Saman Security ${{ steps.final_version.outputs.version }}
           body_path: release_notes.md
           draft: false
           prerelease: false
-          files: wp-security-pilot-${{ steps.final_version.outputs.zip_version }}.zip
+          files: saman-security-${{ steps.final_version.outputs.zip_version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

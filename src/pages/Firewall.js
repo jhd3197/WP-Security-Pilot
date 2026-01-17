@@ -301,8 +301,8 @@ const Firewall = () => {
         setIpErrorMessage('');
         try {
             const [blockData, allowData] = await Promise.all([
-                apiFetch({ path: '/wp-security-pilot/v1/firewall/ips?list=block' }),
-                apiFetch({ path: '/wp-security-pilot/v1/firewall/ips?list=allow' }),
+                apiFetch({ path: '/saman-security/v1/firewall/ips?list=block' }),
+                apiFetch({ path: '/saman-security/v1/firewall/ips?list=allow' }),
             ]);
             setBlockedIps(Array.isArray(blockData) ? blockData : []);
             setAllowedIps(Array.isArray(allowData) ? allowData : []);
@@ -317,7 +317,7 @@ const Firewall = () => {
         setIsRulesLoading(true);
         setRulesErrorMessage('');
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/firewall/rules' });
+            const data = await apiFetch({ path: '/saman-security/v1/firewall/rules' });
             setRules(Array.isArray(data) ? data : []);
         } catch (error) {
             setRulesErrorMessage(error?.message || 'Unable to load firewall rules.');
@@ -330,7 +330,7 @@ const Firewall = () => {
         setIsGeoLoading(true);
         setGeoErrorMessage('');
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/firewall/countries' });
+            const data = await apiFetch({ path: '/saman-security/v1/firewall/countries' });
             setBlockedCountries(Array.isArray(data) ? data : []);
         } catch (error) {
             setGeoErrorMessage(error?.message || 'Unable to load blocked countries.');
@@ -369,7 +369,7 @@ const Firewall = () => {
         setIpErrorMessage('');
         try {
             await apiFetch({
-                path: '/wp-security-pilot/v1/firewall/ips',
+                path: '/saman-security/v1/firewall/ips',
                 method: 'POST',
                 data: {
                     ip: ipAddress.trim(),
@@ -392,7 +392,7 @@ const Firewall = () => {
         setIpErrorMessage('');
         try {
             await apiFetch({
-                path: `/wp-security-pilot/v1/firewall/ips/${id}`,
+                path: `/saman-security/v1/firewall/ips/${id}`,
                 method: 'DELETE',
             });
             await fetchIpLists();
@@ -413,7 +413,7 @@ const Firewall = () => {
         setRulesErrorMessage('');
         try {
             await apiFetch({
-                path: '/wp-security-pilot/v1/firewall/rules',
+                path: '/saman-security/v1/firewall/rules',
                 method: 'POST',
                 data: {
                     description: ruleForm.description.trim(),
@@ -435,7 +435,7 @@ const Firewall = () => {
         setRulesErrorMessage('');
         try {
             await apiFetch({
-                path: `/wp-security-pilot/v1/firewall/rules/${rule.id}`,
+                path: `/saman-security/v1/firewall/rules/${rule.id}`,
                 method: 'PUT',
                 data: {
                     is_active: !rule.is_active,
@@ -459,7 +459,7 @@ const Firewall = () => {
         setGeoErrorMessage('');
         try {
             await apiFetch({
-                path: '/wp-security-pilot/v1/firewall/countries',
+                path: '/saman-security/v1/firewall/countries',
                 method: 'POST',
                 data: {
                     countries: blockedCountries,

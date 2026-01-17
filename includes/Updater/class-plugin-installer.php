@@ -9,7 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class WP_Security_Pilot_Plugin_Installer {
+class Saman_Security_Plugin_Installer {
 
     /**
      * Install a plugin from GitHub

@@ -52,7 +52,7 @@ const More = () => {
 
     const loadPlugins = async () => {
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/updater/plugins' });
+            const data = await apiFetch({ path: '/saman-security/v1/updater/plugins' });
             setPlugins(data);
         } catch (error) {
             console.error('Failed to load plugins:', error);
@@ -66,7 +66,7 @@ const More = () => {
         setChecking(true);
         setNotice(null);
         try {
-            await apiFetch({ path: '/wp-security-pilot/v1/updater/check', method: 'POST' });
+            await apiFetch({ path: '/saman-security/v1/updater/check', method: 'POST' });
             await loadPlugins();
             setNotice({ type: 'success', message: 'Update check complete' });
         } catch (error) {
@@ -82,7 +82,7 @@ const More = () => {
         setNotice(null);
         try {
             const response = await apiFetch({
-                path: `/wp-security-pilot/v1/updater/${action}`,
+                path: `/saman-security/v1/updater/${action}`,
                 method: 'POST',
                 data: { slug },
             });
@@ -101,7 +101,7 @@ const More = () => {
         setBetaLoading(prev => ({ ...prev, [slug]: true }));
         try {
             await apiFetch({
-                path: '/wp-security-pilot/v1/updater/beta',
+                path: '/saman-security/v1/updater/beta',
                 method: 'POST',
                 data: { slug, enabled: !currentEnabled },
             });

@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
+class Saman_Security_Firewall_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'firewall';
     }
 
@@ -113,7 +113,7 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         $table_name = $this->get_ip_table_name();
         if ( ! $this->table_exists( $table_name ) ) {
-            return new WP_Error( 'wpsp_missing_table', 'Firewall IP table is missing.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_missing_table', 'Firewall IP table is missing.', array( 'status' => 500 ) );
         }
 
         $ip = $request->get_param( 'ip' );
@@ -128,11 +128,11 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         $list_type = $this->sanitize_list_type( $list_type );
 
         if ( empty( $ip ) || ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-            return new WP_Error( 'wpsp_invalid_ip', 'Please provide a valid IP address.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_ip', 'Please provide a valid IP address.', array( 'status' => 400 ) );
         }
 
         if ( empty( $list_type ) ) {
-            return new WP_Error( 'wpsp_invalid_list', 'Please select a valid list type.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_list', 'Please select a valid list type.', array( 'status' => 400 ) );
         }
 
         $existing = $wpdb->get_row(
@@ -142,10 +142,10 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         if ( $existing ) {
             if ( $existing['list_type'] === $list_type ) {
-                return new WP_Error( 'wpsp_ip_exists', 'This IP address already exists in the selected list.', array( 'status' => 409 ) );
+                return new WP_Error( 'ss_ip_exists', 'This IP address already exists in the selected list.', array( 'status' => 409 ) );
             }
 
-            return new WP_Error( 'wpsp_ip_conflict', 'This IP address already exists in the opposite list.', array( 'status' => 409 ) );
+            return new WP_Error( 'ss_ip_conflict', 'This IP address already exists in the opposite list.', array( 'status' => 409 ) );
         }
 
         $inserted = $wpdb->insert(
@@ -160,12 +160,12 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         );
 
         if ( false === $inserted ) {
-            return new WP_Error( 'wpsp_insert_failed', 'Unable to save the IP address.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_insert_failed', 'Unable to save the IP address.', array( 'status' => 500 ) );
         }
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
             $message = ( 'allow' === $list_type ) ? 'Firewall allowlist updated' : 'Firewall blocklist updated';
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', $message, get_current_user_id() );
+            Saman_Security_Activity_Logger::log_event( 'allowed', $message, get_current_user_id() );
         }
 
         return rest_ensure_response(
@@ -181,12 +181,12 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         $table_name = $this->get_ip_table_name();
         if ( ! $this->table_exists( $table_name ) ) {
-            return new WP_Error( 'wpsp_missing_table', 'Firewall IP table is missing.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_missing_table', 'Firewall IP table is missing.', array( 'status' => 500 ) );
         }
 
         $id = absint( $request['id'] );
         if ( ! $id ) {
-            return new WP_Error( 'wpsp_invalid_id', 'Invalid blocked IP ID.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_id', 'Invalid blocked IP ID.', array( 'status' => 400 ) );
         }
 
         $list_type = $wpdb->get_var(
@@ -195,23 +195,23 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         $deleted = $wpdb->delete( $table_name, array( 'id' => $id ), array( '%d' ) );
         if ( false === $deleted ) {
-            return new WP_Error( 'wpsp_delete_failed', 'Unable to remove the blocked IP.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_delete_failed', 'Unable to remove the blocked IP.', array( 'status' => 500 ) );
         }
 
         if ( 0 === $deleted ) {
-            return new WP_Error( 'wpsp_not_found', 'Blocked IP not found.', array( 'status' => 404 ) );
+            return new WP_Error( 'ss_not_found', 'Blocked IP not found.', array( 'status' => 404 ) );
         }
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
             $message = ( 'allow' === $list_type ) ? 'Firewall allowlist updated' : 'Firewall blocklist updated';
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', $message, get_current_user_id() );
+            Saman_Security_Activity_Logger::log_event( 'allowed', $message, get_current_user_id() );
         }
 
         return rest_ensure_response( array( 'success' => true ) );
     }
 
     public function get_countries( $request ) {
-        $countries = get_option( 'wpsp_blocked_countries', array() );
+        $countries = get_option( 'ss_blocked_countries', array() );
         if ( ! is_array( $countries ) ) {
             $countries = array();
         }
@@ -224,7 +224,7 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         $countries = isset( $params['countries'] ) ? $params['countries'] : $params;
 
         if ( ! is_array( $countries ) ) {
-            return new WP_Error( 'wpsp_invalid_countries', 'Please provide a list of country codes.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_countries', 'Please provide a list of country codes.', array( 'status' => 400 ) );
         }
 
         $sanitized = array();
@@ -236,10 +236,10 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         }
 
         $sanitized = array_values( array_unique( $sanitized ) );
-        update_option( 'wpsp_blocked_countries', $sanitized );
+        update_option( 'ss_blocked_countries', $sanitized );
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', 'Geo-blocking rules updated', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'allowed', 'Geo-blocking rules updated', get_current_user_id() );
         }
 
         return rest_ensure_response( $sanitized );
@@ -271,17 +271,17 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         $table_name = $this->get_rules_table_name();
         if ( ! $this->table_exists( $table_name ) ) {
-            return new WP_Error( 'wpsp_missing_table', 'Firewall rules table is missing.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_missing_table', 'Firewall rules table is missing.', array( 'status' => 500 ) );
         }
 
         $id = absint( $request['id'] );
         if ( ! $id ) {
-            return new WP_Error( 'wpsp_invalid_id', 'Invalid rule ID.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_id', 'Invalid rule ID.', array( 'status' => 400 ) );
         }
 
         $params = $request->get_json_params();
         if ( ! isset( $params['is_active'] ) ) {
-            return new WP_Error( 'wpsp_invalid_rule', 'Missing rule status.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_rule', 'Missing rule status.', array( 'status' => 400 ) );
         }
 
         $is_active = filter_var( $params['is_active'], FILTER_VALIDATE_BOOLEAN );
@@ -295,11 +295,11 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         );
 
         if ( false === $updated ) {
-            return new WP_Error( 'wpsp_update_failed', 'Unable to update firewall rule.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_update_failed', 'Unable to update firewall rule.', array( 'status' => 500 ) );
         }
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', 'Firewall rule toggled', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'allowed', 'Firewall rule toggled', get_current_user_id() );
         }
 
         return rest_ensure_response( array( 'success' => true ) );
@@ -310,7 +310,7 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
         $table_name = $this->get_rules_table_name();
         if ( ! $this->table_exists( $table_name ) ) {
-            return new WP_Error( 'wpsp_missing_table', 'Firewall rules table is missing.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_missing_table', 'Firewall rules table is missing.', array( 'status' => 500 ) );
         }
 
         $params = $request->get_json_params();
@@ -319,16 +319,16 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         $pattern = isset( $params['pattern'] ) ? trim( $params['pattern'] ) : '';
 
         if ( empty( $description ) || empty( $target_area ) || empty( $pattern ) ) {
-            return new WP_Error( 'wpsp_invalid_rule', 'Please provide description, target area, and pattern.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_rule', 'Please provide description, target area, and pattern.', array( 'status' => 400 ) );
         }
 
         if ( ! in_array( strtoupper( $target_area ), array( 'GET', 'POST', 'COOKIE', 'USER_AGENT', 'URL' ), true ) ) {
-            return new WP_Error( 'wpsp_invalid_target', 'Invalid target area.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_target', 'Invalid target area.', array( 'status' => 400 ) );
         }
 
         $pattern = $this->normalize_pattern( $pattern );
         if ( ! $this->is_regex_valid( $pattern ) ) {
-            return new WP_Error( 'wpsp_invalid_pattern', 'Invalid regex pattern.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_pattern', 'Invalid regex pattern.', array( 'status' => 400 ) );
         }
 
         $inserted = $wpdb->insert(
@@ -345,11 +345,11 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
         );
 
         if ( false === $inserted ) {
-            return new WP_Error( 'wpsp_insert_failed', 'Unable to create firewall rule.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_insert_failed', 'Unable to create firewall rule.', array( 'status' => 500 ) );
         }
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', 'Custom firewall rule added', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'allowed', 'Custom firewall rule added', get_current_user_id() );
         }
 
         return rest_ensure_response( array( 'success' => true, 'id' => $wpdb->insert_id ) );
@@ -369,12 +369,12 @@ class WP_Security_Pilot_Firewall_Controller extends WP_REST_Controller {
 
     private function get_ip_table_name() {
         global $wpdb;
-        return $wpdb->prefix . 'wpsp_ip_list';
+        return $wpdb->prefix . 'ss_ip_list';
     }
 
     private function get_rules_table_name() {
         global $wpdb;
-        return $wpdb->prefix . 'wpsp_firewall_rules';
+        return $wpdb->prefix . 'ss_firewall_rules';
     }
 
     private function table_exists( $table_name ) {

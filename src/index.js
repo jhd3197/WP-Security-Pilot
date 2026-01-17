@@ -3,6 +3,6 @@ import App from './App';
 
 import './index.css';
 
-const initialView = window?.wpSecurityPilotSettings?.initialView || 'dashboard';
+const initialView = window?.samanSecuritySettings?.initialView || 'dashboard';
 
-render(<App initialView={initialView} />, document.getElementById('wp-security-pilot-root'));
+render(<App initialView={initialView} />, document.getElementById('saman-security-root'));

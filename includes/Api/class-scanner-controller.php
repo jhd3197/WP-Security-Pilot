@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Scanner_Controller extends WP_REST_Controller {
+class Saman_Security_Scanner_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'scanner';
     }
 
@@ -92,29 +92,29 @@ class WP_Security_Pilot_Scanner_Controller extends WP_REST_Controller {
     }
 
     public function start_scan( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $job_id = $scanner->start_scan();
 
         if ( ! $job_id ) {
-            return new WP_Error( 'wpsp_scan_failed', 'Unable to start scan.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_scan_failed', 'Unable to start scan.', array( 'status' => 500 ) );
         }
 
         return rest_ensure_response( array( 'job_id' => $job_id ) );
     }
 
     public function get_status( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $status = $scanner->get_status( $request['job_id'] );
 
         if ( ! $status ) {
-            return new WP_Error( 'wpsp_scan_not_found', 'Scan job not found.', array( 'status' => 404 ) );
+            return new WP_Error( 'ss_scan_not_found', 'Scan job not found.', array( 'status' => 404 ) );
         }
 
         return rest_ensure_response( $status );
     }
 
     public function get_latest_status( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $status = $scanner->get_latest_status();
 
         if ( ! $status ) {
@@ -125,18 +125,18 @@ class WP_Security_Pilot_Scanner_Controller extends WP_REST_Controller {
     }
 
     public function stop_scan( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $stopped = $scanner->stop_scan( $request['job_id'] );
 
         if ( ! $stopped ) {
-            return new WP_Error( 'wpsp_scan_stop_failed', 'Unable to stop scan.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_scan_stop_failed', 'Unable to stop scan.', array( 'status' => 500 ) );
         }
 
         return rest_ensure_response( array( 'success' => true ) );
     }
 
     public function get_ignore( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         return rest_ensure_response( $scanner->get_ignore_patterns() );
     }
 
@@ -145,27 +145,27 @@ class WP_Security_Pilot_Scanner_Controller extends WP_REST_Controller {
         $patterns = isset( $params['patterns'] ) ? $params['patterns'] : $params;
 
         if ( ! is_array( $patterns ) ) {
-            return new WP_Error( 'wpsp_invalid_ignore', 'Please provide ignore patterns.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_ignore', 'Please provide ignore patterns.', array( 'status' => 400 ) );
         }
 
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $saved = $scanner->set_ignore_patterns( $patterns );
 
         return rest_ensure_response( $saved );
     }
 
     public function get_schedule( $request ) {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         return rest_ensure_response( $scanner->get_schedule() );
     }
 
     public function update_schedule( $request ) {
         $params = $request->get_json_params();
         if ( ! is_array( $params ) ) {
-            return new WP_Error( 'wpsp_invalid_schedule', 'Please provide schedule settings.', array( 'status' => 400 ) );
+            return new WP_Error( 'ss_invalid_schedule', 'Please provide schedule settings.', array( 'status' => 400 ) );
         }
 
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $schedule = $scanner->update_schedule( $params );
 
         return rest_ensure_response( $schedule );

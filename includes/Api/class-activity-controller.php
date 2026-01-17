@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Activity_Controller extends WP_REST_Controller {
+class Saman_Security_Activity_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'activity';
     }
 
@@ -105,7 +105,7 @@ class WP_Security_Pilot_Activity_Controller extends WP_REST_Controller {
 
         $table_name = $this->get_table_name();
         if ( ! $this->table_exists( $table_name ) ) {
-            return new WP_Error( 'wpsp_missing_table', 'Activity log table is missing.', array( 'status' => 500 ) );
+            return new WP_Error( 'ss_missing_table', 'Activity log table is missing.', array( 'status' => 500 ) );
         }
 
         $search = $request->get_param( 'search' );
@@ -147,7 +147,7 @@ class WP_Security_Pilot_Activity_Controller extends WP_REST_Controller {
 
         $response = new WP_REST_Response( $csv );
         $response->header( 'Content-Type', 'text/csv; charset=utf-8' );
-        $response->header( 'Content-Disposition', 'attachment; filename=wp-security-pilot-activity-log.csv' );
+        $response->header( 'Content-Disposition', 'attachment; filename=saman-security-activity-log.csv' );
 
         return $response;
     }
@@ -158,7 +158,7 @@ class WP_Security_Pilot_Activity_Controller extends WP_REST_Controller {
 
     private function get_table_name() {
         global $wpdb;
-        return $wpdb->prefix . 'wpsp_activity_log';
+        return $wpdb->prefix . 'ss_activity_log';
     }
 
     private function table_exists( $table_name ) {

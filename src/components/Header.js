@@ -18,7 +18,7 @@ const Header = ({ currentView, onNavigate }) => {
                         <path d="M10.5 12.7l-2-2-1.3 1.3 3.3 3.3 5.3-5.3-1.3-1.3-4 4z" />
                     </svg>
                 </span>
-                <span className="brand-name">WP Security Pilot</span>
+                <span className="brand-name">Saman Security</span>
             </div>
             <nav className="main-nav" aria-label="Primary">
                 {navItems.map((item) => (
@@ -36,7 +36,7 @@ const Header = ({ currentView, onNavigate }) => {
             <div className="nav-actions">
                 <a
                     className="icon-button"
-                    href="https://github.com/jhd3197/WP-Security-Pilot"
+                    href="https://github.com/SamanLabs/Saman-Security"
                     target="_blank"
                     rel="noreferrer"
                     aria-label="Open GitHub repository"

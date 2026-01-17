@@ -1,14 +1,14 @@
 <?php
-class WP_Security_Pilot_Admin_Loader {
+class Saman_Security_Admin_Loader {
     private $view_map = array(
-        'wp-security-pilot' => 'dashboard',
-        'wp-security-pilot-dashboard' => 'dashboard',
-        'wp-security-pilot-firewall' => 'firewall',
-        'wp-security-pilot-scanner' => 'scanner',
-        'wp-security-pilot-hardening' => 'hardening',
-        'wp-security-pilot-activity' => 'activity',
-        'wp-security-pilot-settings' => 'settings',
-        'wp-security-pilot-more' => 'more',
+        'saman-security' => 'dashboard',
+        'saman-security-dashboard' => 'dashboard',
+        'saman-security-firewall' => 'firewall',
+        'saman-security-scanner' => 'scanner',
+        'saman-security-hardening' => 'hardening',
+        'saman-security-activity' => 'activity',
+        'saman-security-settings' => 'settings',
+        'saman-security-more' => 'more',
     );
 
     public function __construct() {
@@ -28,135 +28,150 @@ class WP_Security_Pilot_Admin_Loader {
     }
 
     public function register_api_routes() {
-        $settings_controller = new WP_Security_Pilot_Settings_Controller();
+        $settings_controller = new Saman_Security_Settings_Controller();
         $settings_controller->register_routes();
 
-        $firewall_controller = new WP_Security_Pilot_Firewall_Controller();
+        $firewall_controller = new Saman_Security_Firewall_Controller();
         $firewall_controller->register_routes();
 
-        $activity_controller = new WP_Security_Pilot_Activity_Controller();
+        $activity_controller = new Saman_Security_Activity_Controller();
         $activity_controller->register_routes();
 
-        $hardening_controller = new WP_Security_Pilot_Hardening_Controller();
+        $hardening_controller = new Saman_Security_Hardening_Controller();
         $hardening_controller->register_routes();
 
-        $scanner_controller = new WP_Security_Pilot_Scanner_Controller();
+        $scanner_controller = new Saman_Security_Scanner_Controller();
         $scanner_controller->register_routes();
 
-        $dashboard_controller = new WP_Security_Pilot_Dashboard_Controller();
+        $dashboard_controller = new Saman_Security_Dashboard_Controller();
         $dashboard_controller->register_routes();
 
-        $updater_controller = new WP_Security_Pilot_Updater_Controller();
+        $updater_controller = new Saman_Security_Updater_Controller();
         $updater_controller->register_routes();
     }
 
 
     public function add_plugin_admin_menu() {
         add_menu_page(
-            'WP Security Pilot',
-            'Security Pilot',
+            'Saman Security',
+            'Saman Security',
             'manage_options',
-            'wp-security-pilot',
+            'saman-security',
             array( $this, 'display_plugin_admin_page' ),
             'dashicons-shield-alt',
             100
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Dashboard',
             'Dashboard',
             'manage_options',
-            'wp-security-pilot-dashboard',
+            'saman-security-dashboard',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Firewall',
             'Firewall',
             'manage_options',
-            'wp-security-pilot-firewall',
+            'saman-security-firewall',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Scanner',
             'Scanner',
             'manage_options',
-            'wp-security-pilot-scanner',
+            'saman-security-scanner',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Hardening',
             'Hardening',
             'manage_options',
-            'wp-security-pilot-hardening',
+            'saman-security-hardening',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Activity Log',
             'Activity Log',
             'manage_options',
-            'wp-security-pilot-activity',
+            'saman-security-activity',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'Settings',
             'Settings',
             'manage_options',
-            'wp-security-pilot-settings',
+            'saman-security-settings',
             array( $this, 'display_plugin_admin_page' )
         );
 
         add_submenu_page(
-            'wp-security-pilot',
+            'saman-security',
             'More',
             'More',
             'manage_options',
-            'wp-security-pilot-more',
+            'saman-security-more',
             array( $this, 'display_plugin_admin_page' )
         );
     }
 
     public function display_plugin_admin_page() {
         ?>
-        <div id="wp-security-pilot-root"></div>
+        <div id="saman-security-root"></div>
         <?php
     }
 
     public function enqueue_scripts( $hook ) {
-        if ( false === strpos( $hook, 'wp-security-pilot' ) ) {
+        if ( false === strpos( $hook, 'saman-security' ) ) {
             return;
         }
 
         wp_enqueue_script(
-            'wp-security-pilot-admin-app',
+            'saman-security-admin-app',
             plugin_dir_url( __FILE__ ) . '../assets/js/index.js',
             array( 'wp-api-fetch', 'wp-element' ),
-            WP_SECURITY_PILOT_VERSION,
+            SAMAN_SECURITY_VERSION,
             true
         );
 
         wp_enqueue_style(
-            'wp-security-pilot-admin-style',
+            'saman-security-admin-style',
             plugin_dir_url( __FILE__ ) . '../assets/js/index.css',
             array(),
-            WP_SECURITY_PILOT_VERSION
+            SAMAN_SECURITY_VERSION
         );
 
+        $settings = class_exists( 'Saman_Security_Settings' ) ? Saman_Security_Settings::get_settings() : array();
+        $analytics_settings = isset( $settings['analytics'] ) && is_array( $settings['analytics'] ) ? $settings['analytics'] : array();
+        $analytics_enabled = isset( $analytics_settings['enabled'] ) ? (bool) $analytics_settings['enabled'] : true;
+        $matomo_url = defined( 'SAMAN_SECURITY_MATOMO_URL' ) ? SAMAN_SECURITY_MATOMO_URL : 'https://matomo.builditdesign.com/';
+        $matomo_site_id = defined( 'SAMAN_SECURITY_MATOMO_SITE_ID' ) ? SAMAN_SECURITY_MATOMO_SITE_ID : '1';
+        $matomo_url = apply_filters( 'saman_security_matomo_url', $matomo_url );
+        $matomo_site_id = apply_filters( 'saman_security_matomo_site_id', $matomo_site_id );
+
         wp_localize_script(
-            'wp-security-pilot-admin-app',
-            'wpSecurityPilotSettings',
+            'saman-security-admin-app',
+            'samanSecuritySettings',
             array(
                 'initialView' => $this->get_initial_view(),
+                'analytics'   => array(
+                    'enabled'       => $analytics_enabled,
+                    'matomoUrl'     => esc_url_raw( $matomo_url ),
+                    'siteId'        => (string) $matomo_site_id,
+                    'siteHash'      => wp_hash( home_url() ),
+                    'pluginVersion' => SAMAN_SECURITY_VERSION,
+                ),
             )
         );
     }

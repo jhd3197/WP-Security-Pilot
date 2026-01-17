@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
+class Saman_Security_Dashboard_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'dashboard';
     }
 
@@ -31,8 +31,8 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
             'firewall'         => $this->get_firewall_summary(),
             'notifications'    => $this->get_notification_summary(),
             'general'          => array(
-                'ip_anonymization'   => WP_Security_Pilot_Settings::get_setting( array( 'general', 'ip_anonymization' ), true ),
-                'log_retention_days' => WP_Security_Pilot_Settings::get_setting( array( 'general', 'log_retention_days' ), 30 ),
+                'ip_anonymization'   => Saman_Security_Settings::get_setting( array( 'general', 'ip_anonymization' ), true ),
+                'log_retention_days' => Saman_Security_Settings::get_setting( array( 'general', 'log_retention_days' ), 30 ),
             ),
         );
 
@@ -44,7 +44,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
     }
 
     private function get_security_posture() {
-        $settings = WP_Security_Pilot_Hardening::get_settings();
+        $settings = Saman_Security_Hardening::get_settings();
         $items = array(
             'file_editor_disabled' => ! empty( $settings['general']['disable_file_editor'] ),
             'xmlrpc_blocked'       => in_array( $settings['general']['xmlrpc_mode'], array( 'disable', 'pingbacks' ), true ),
@@ -79,7 +79,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
     private function get_recent_activity() {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'wpsp_activity_log';
+        $table = $wpdb->prefix . 'ss_activity_log';
         $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
         if ( $exists !== $table ) {
             return array(
@@ -151,7 +151,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
     }
 
     private function get_scanner_status() {
-        $scanner = new WP_Security_Pilot_Scanner();
+        $scanner = new Saman_Security_Scanner();
         $status = $scanner->get_latest_status();
 
         if ( ! $status ) {
@@ -168,7 +168,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
         if ( ! empty( $status['id'] ) ) {
             $issues = (int) $wpdb->get_var(
                 $wpdb->prepare(
-                    "SELECT COUNT(*) FROM {$wpdb->prefix}wpsp_scan_results WHERE job_id = %d",
+                    "SELECT COUNT(*) FROM {$wpdb->prefix}ss_scan_results WHERE job_id = %d",
                     $status['id']
                 )
             );
@@ -190,8 +190,8 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
     private function get_firewall_summary() {
         global $wpdb;
 
-        $ip_table = $wpdb->prefix . 'wpsp_ip_list';
-        $rules_table = $wpdb->prefix . 'wpsp_firewall_rules';
+        $ip_table = $wpdb->prefix . 'ss_ip_list';
+        $rules_table = $wpdb->prefix . 'ss_firewall_rules';
 
         $blocklist_count = 0;
         $allowlist_count = 0;
@@ -211,7 +211,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
             );
         }
 
-        $blocked_countries = get_option( 'wpsp_blocked_countries', array() );
+        $blocked_countries = get_option( 'ss_blocked_countries', array() );
         $blocked_countries = is_array( $blocked_countries ) ? $blocked_countries : array();
 
         return array(
@@ -223,7 +223,7 @@ class WP_Security_Pilot_Dashboard_Controller extends WP_REST_Controller {
     }
 
     private function get_notification_summary() {
-        $settings = WP_Security_Pilot_Settings::get_settings();
+        $settings = Saman_Security_Settings::get_settings();
         $alerts = isset( $settings['notifications']['alerts'] ) ? $settings['notifications']['alerts'] : array();
         $enabled = count( array_filter( $alerts ) );
 

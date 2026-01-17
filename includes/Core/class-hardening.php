@@ -1,7 +1,7 @@
 <?php
 
-class WP_Security_Pilot_Hardening {
-    const OPTION_KEY = 'wp_security_pilot_hardening';
+class Saman_Security_Hardening {
+    const OPTION_KEY = 'saman_security_hardening';
 
     public function register_hooks() {
         add_filter( 'xmlrpc_enabled', array( $this, 'filter_xmlrpc_enabled' ) );
@@ -168,14 +168,14 @@ class WP_Security_Pilot_Hardening {
         }
 
         if ( ! is_user_logged_in() ) {
-            return new WP_Error( 'wpsp_rest_auth_required', __( 'REST API access requires authentication.', 'wp-security-pilot' ), array( 'status' => 401 ) );
+            return new WP_Error( 'ss_rest_auth_required', __( 'REST API access requires authentication.', 'saman-security' ), array( 'status' => 401 ) );
         }
 
         if ( 'restricted' === $access ) {
             $user = wp_get_current_user();
             $allowed_roles = array_map( 'sanitize_key', (array) $settings['rest']['allowed_roles'] );
             if ( empty( array_intersect( $allowed_roles, (array) $user->roles ) ) ) {
-                return new WP_Error( 'wpsp_rest_forbidden', __( 'REST API access is restricted.', 'wp-security-pilot' ), array( 'status' => 403 ) );
+                return new WP_Error( 'ss_rest_forbidden', __( 'REST API access is restricted.', 'saman-security' ), array( 'status' => 403 ) );
             }
         }
 
@@ -201,8 +201,8 @@ class WP_Security_Pilot_Hardening {
         $data = $this->get_login_attempts( $ip_address );
         if ( isset( $data['locked_until'] ) && $data['locked_until'] > time() ) {
             return new WP_Error(
-                'wpsp_login_locked',
-                __( 'Too many failed login attempts. Please try again later.', 'wp-security-pilot' )
+                'ss_login_locked',
+                __( 'Too many failed login attempts. Please try again later.', 'saman-security' )
             );
         }
 
@@ -238,8 +238,8 @@ class WP_Security_Pilot_Hardening {
 
         if ( $data['count'] >= $limit ) {
             $data['locked_until'] = $now + $lockout;
-            if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-                WP_Security_Pilot_Activity_Logger::log_event( 'blocked', 'Login lockout triggered', 0, $ip_address, $username );
+            if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+                Saman_Security_Activity_Logger::log_event( 'blocked', 'Login lockout triggered', 0, $ip_address, $username );
             }
         }
 
@@ -264,7 +264,7 @@ class WP_Security_Pilot_Hardening {
 
         $messages = $this->validate_password_rules( $password, $sanitized_user_login, $user_email );
         foreach ( $messages as $message ) {
-            $errors->add( 'wpsp_password_policy', $message );
+            $errors->add( 'ss_password_policy', $message );
         }
 
         return $errors;
@@ -278,7 +278,7 @@ class WP_Security_Pilot_Hardening {
 
         $messages = $this->validate_password_rules( $password, $user->user_login, $user->user_email );
         foreach ( $messages as $message ) {
-            $errors->add( 'wpsp_password_policy', $message );
+            $errors->add( 'ss_password_policy', $message );
         }
     }
 
@@ -288,32 +288,32 @@ class WP_Security_Pilot_Hardening {
 
         $messages = array();
         if ( strlen( $password ) < (int) $policy['min_length'] ) {
-            $messages[] = sprintf( __( 'Password must be at least %d characters.', 'wp-security-pilot' ), (int) $policy['min_length'] );
+            $messages[] = sprintf( __( 'Password must be at least %d characters.', 'saman-security' ), (int) $policy['min_length'] );
         }
 
         if ( $policy['require_upper'] && ! preg_match( '/[A-Z]/', $password ) ) {
-            $messages[] = __( 'Password must include at least one uppercase letter.', 'wp-security-pilot' );
+            $messages[] = __( 'Password must include at least one uppercase letter.', 'saman-security' );
         }
         if ( $policy['require_lower'] && ! preg_match( '/[a-z]/', $password ) ) {
-            $messages[] = __( 'Password must include at least one lowercase letter.', 'wp-security-pilot' );
+            $messages[] = __( 'Password must include at least one lowercase letter.', 'saman-security' );
         }
         if ( $policy['require_number'] && ! preg_match( '/[0-9]/', $password ) ) {
-            $messages[] = __( 'Password must include at least one number.', 'wp-security-pilot' );
+            $messages[] = __( 'Password must include at least one number.', 'saman-security' );
         }
         if ( $policy['require_special'] && ! preg_match( '/[^a-zA-Z0-9]/', $password ) ) {
-            $messages[] = __( 'Password must include at least one special character.', 'wp-security-pilot' );
+            $messages[] = __( 'Password must include at least one special character.', 'saman-security' );
         }
 
         $password_lower = strtolower( $password );
         if ( $policy['block_common'] && in_array( $password_lower, $this->get_common_passwords(), true ) ) {
-            $messages[] = __( 'Password is too common. Choose a stronger password.', 'wp-security-pilot' );
+            $messages[] = __( 'Password is too common. Choose a stronger password.', 'saman-security' );
         }
 
         if ( $user_login && false !== stripos( $password, $user_login ) ) {
-            $messages[] = __( 'Password should not contain your username.', 'wp-security-pilot' );
+            $messages[] = __( 'Password should not contain your username.', 'saman-security' );
         }
         if ( $user_email && false !== stripos( $password, $user_email ) ) {
-            $messages[] = __( 'Password should not contain your email address.', 'wp-security-pilot' );
+            $messages[] = __( 'Password should not contain your email address.', 'saman-security' );
         }
 
         return $messages;
@@ -364,7 +364,7 @@ class WP_Security_Pilot_Hardening {
     }
 
     private function get_login_attempts_key( $ip_address ) {
-        return 'wpsp_login_fail_' . md5( $ip_address );
+        return 'ss_login_fail_' . md5( $ip_address );
     }
 
     private function get_login_attempts( $ip_address ) {

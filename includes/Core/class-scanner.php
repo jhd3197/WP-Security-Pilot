@@ -1,6 +1,6 @@
 <?php
 
-class WP_Security_Pilot_Scanner {
+class Saman_Security_Scanner {
     const CHUNK_SIZE = 25;
     const MAX_SCAN_BYTES = 5242880;
     private $scan_cache_table_exists = null;
@@ -9,14 +9,14 @@ class WP_Security_Pilot_Scanner {
         global $wpdb;
 
         $existing = $wpdb->get_var(
-            "SELECT id FROM {$wpdb->prefix}wpsp_scan_jobs WHERE status IN ('pending','running') ORDER BY id DESC LIMIT 1"
+            "SELECT id FROM {$wpdb->prefix}ss_scan_jobs WHERE status IN ('pending','running') ORDER BY id DESC LIMIT 1"
         );
         if ( $existing ) {
             return (int) $existing;
         }
 
         $job_created = $wpdb->insert(
-            $wpdb->prefix . 'wpsp_scan_jobs',
+            $wpdb->prefix . 'ss_scan_jobs',
             array(
                 'status'          => 'running',
                 'total_files'     => 0,
@@ -40,7 +40,7 @@ class WP_Security_Pilot_Scanner {
         update_option( $this->get_queue_option_key( $job_id ), $files, false );
 
         $wpdb->update(
-            $wpdb->prefix . 'wpsp_scan_jobs',
+            $wpdb->prefix . 'ss_scan_jobs',
             array(
                 'total_files'  => count( $files ),
                 'last_message' => 'Queued files for scanning',
@@ -50,12 +50,12 @@ class WP_Security_Pilot_Scanner {
             array( '%d' )
         );
 
-        wp_schedule_single_event( time() + 1, 'wpsp_scan_chunk', array( $job_id ) );
+        wp_schedule_single_event( time() + 1, 'ss_scan_chunk', array( $job_id ) );
         $this->kick_cron();
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
             $label = ( 'scheduled' === $initiator ) ? 'Scheduled scan started' : 'Manual scan started';
-            WP_Security_Pilot_Activity_Logger::log_event( 'alert', $label, get_current_user_id() );
+            Saman_Security_Activity_Logger::log_event( 'alert', $label, get_current_user_id() );
         }
 
         return $job_id;
@@ -84,7 +84,7 @@ class WP_Security_Pilot_Scanner {
 
             if ( 'pending' === $job['status'] ) {
                 $wpdb->update(
-                    $wpdb->prefix . 'wpsp_scan_jobs',
+                    $wpdb->prefix . 'ss_scan_jobs',
                     array( 'status' => 'running' ),
                     array( 'id' => $job_id ),
                     array( '%s' ),
@@ -164,7 +164,7 @@ class WP_Security_Pilot_Scanner {
             $new_processed = min( (int) $job['processed_files'] + $processed, (int) $job['total_files'] );
 
             $wpdb->update(
-                $wpdb->prefix . 'wpsp_scan_jobs',
+                $wpdb->prefix . 'ss_scan_jobs',
                 array(
                     'processed_files' => $new_processed,
                     'last_message'    => $last_message ? $last_message : $job['last_message'],
@@ -180,7 +180,7 @@ class WP_Security_Pilot_Scanner {
             }
 
             $delay = $this->get_chunk_delay( $config );
-            wp_schedule_single_event( time() + $delay, 'wpsp_scan_chunk', array( $job_id ) );
+            wp_schedule_single_event( time() + $delay, 'ss_scan_chunk', array( $job_id ) );
         } finally {
             delete_transient( $lock_key );
         }
@@ -194,12 +194,12 @@ class WP_Security_Pilot_Scanner {
             return false;
         }
 
-        wp_clear_scheduled_hook( 'wpsp_scan_chunk', array( $job_id ) );
+        wp_clear_scheduled_hook( 'ss_scan_chunk', array( $job_id ) );
         delete_option( $this->get_queue_option_key( $job_id ) );
         delete_option( $this->get_config_option_key( $job_id ) );
 
         $updated = $wpdb->update(
-            $wpdb->prefix . 'wpsp_scan_jobs',
+            $wpdb->prefix . 'ss_scan_jobs',
             array(
                 'status'       => 'stopped',
                 'completed_at' => current_time( 'mysql' ),
@@ -210,8 +210,8 @@ class WP_Security_Pilot_Scanner {
             array( '%d' )
         );
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'alert', 'Scan stopped', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'alert', 'Scan stopped', get_current_user_id() );
         }
 
         return false !== $updated;
@@ -242,7 +242,7 @@ class WP_Security_Pilot_Scanner {
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT file_path, status, issue_type, details, created_at
-                 FROM {$wpdb->prefix}wpsp_scan_results
+                 FROM {$wpdb->prefix}ss_scan_results
                  WHERE job_id = %d
                  ORDER BY id DESC
                  LIMIT 20",
@@ -268,7 +268,7 @@ class WP_Security_Pilot_Scanner {
         global $wpdb;
 
         $job_id = $wpdb->get_var(
-            "SELECT id FROM {$wpdb->prefix}wpsp_scan_jobs ORDER BY id DESC LIMIT 1"
+            "SELECT id FROM {$wpdb->prefix}ss_scan_jobs ORDER BY id DESC LIMIT 1"
         );
 
         if ( ! $job_id ) {
@@ -301,20 +301,20 @@ class WP_Security_Pilot_Scanner {
             'enabled'   => $enabled,
         );
 
-        update_option( 'wpsp_scan_schedule', $schedule );
+        update_option( 'ss_scan_schedule', $schedule );
 
-        wp_clear_scheduled_hook( 'wpsp_scan_scheduled' );
+        wp_clear_scheduled_hook( 'ss_scan_scheduled' );
 
         if ( $enabled ) {
             $timestamp = $this->get_next_schedule_timestamp( $time, $frequency );
-            wp_schedule_event( $timestamp, $frequency, 'wpsp_scan_scheduled' );
+            wp_schedule_event( $timestamp, $frequency, 'ss_scan_scheduled' );
         }
 
         return $schedule;
     }
 
     public function get_schedule() {
-        $schedule = get_option( 'wpsp_scan_schedule', array() );
+        $schedule = get_option( 'ss_scan_schedule', array() );
         if ( ! is_array( $schedule ) ) {
             $schedule = array();
         }
@@ -329,7 +329,7 @@ class WP_Security_Pilot_Scanner {
     public function get_ignore_patterns() {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'wpsp_scan_ignore';
+        $table = $wpdb->prefix . 'ss_scan_ignore';
         $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
         if ( $exists !== $table ) {
             return array();
@@ -342,7 +342,7 @@ class WP_Security_Pilot_Scanner {
     public function set_ignore_patterns( $patterns ) {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'wpsp_scan_ignore';
+        $table = $wpdb->prefix . 'ss_scan_ignore';
         $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
         if ( $exists !== $table ) {
             return array();
@@ -370,7 +370,7 @@ class WP_Security_Pilot_Scanner {
         global $wpdb;
 
         $wpdb->update(
-            $wpdb->prefix . 'wpsp_scan_jobs',
+            $wpdb->prefix . 'ss_scan_jobs',
             array(
                 'status'       => 'completed',
                 'completed_at' => current_time( 'mysql' ),
@@ -384,8 +384,8 @@ class WP_Security_Pilot_Scanner {
         delete_option( $this->get_queue_option_key( $job_id ) );
         delete_option( $this->get_config_option_key( $job_id ) );
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'alert', 'Scan completed', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'alert', 'Scan completed', get_current_user_id() );
         }
     }
 
@@ -395,7 +395,7 @@ class WP_Security_Pilot_Scanner {
         return $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT id, status, total_files, processed_files, last_message, started_at, completed_at
-                 FROM {$wpdb->prefix}wpsp_scan_jobs
+                 FROM {$wpdb->prefix}ss_scan_jobs
                  WHERE id = %d",
                 $job_id
             ),
@@ -473,7 +473,7 @@ class WP_Security_Pilot_Scanner {
                 'core_checksum',
                 'Checksum mismatch'
             );
-            WP_Security_Pilot_Notifications::send_alert(
+            Saman_Security_Notifications::send_alert(
                 'core_file_modified',
                 'Core file integrity check failed.',
                 array( 'file' => $relative_path )
@@ -509,7 +509,7 @@ class WP_Security_Pilot_Scanner {
                     'malware_signature',
                     $signature['name']
                 );
-                WP_Security_Pilot_Notifications::send_alert(
+                Saman_Security_Notifications::send_alert(
                     'malware_found',
                     'Malware signature detected.',
                     array(
@@ -523,7 +523,7 @@ class WP_Security_Pilot_Scanner {
         }
 
         if ( 'high' === $config['scan_intensity'] ) {
-            $custom_issue = apply_filters( 'wpsp_scanner_vulnerability', null, $file_path );
+            $custom_issue = apply_filters( 'saman_security_scanner_vulnerability', null, $file_path );
             if ( $custom_issue ) {
                 $this->log_result(
                     $job_id,
@@ -543,7 +543,7 @@ class WP_Security_Pilot_Scanner {
         global $wpdb;
 
         $wpdb->insert(
-            $wpdb->prefix . 'wpsp_scan_results',
+            $wpdb->prefix . 'ss_scan_results',
             array(
                 'job_id'     => $job_id,
                 'file_path'  => $file_path,
@@ -563,7 +563,7 @@ class WP_Security_Pilot_Scanner {
     private function get_core_checksums() {
         $version = get_bloginfo( 'version' );
         $locale = get_locale();
-        $cache_key = 'wpsp_core_checksums_' . md5( $version . '|' . $locale );
+        $cache_key = 'ss_core_checksums_' . md5( $version . '|' . $locale );
         $checksums = get_site_transient( $cache_key );
 
         if ( false !== $checksums && is_array( $checksums ) ) {
@@ -697,11 +697,11 @@ class WP_Security_Pilot_Scanner {
     }
 
     private function get_queue_option_key( $job_id ) {
-        return 'wpsp_scan_queue_' . absint( $job_id );
+        return 'ss_scan_queue_' . absint( $job_id );
     }
 
     private function get_config_option_key( $job_id ) {
-        return 'wpsp_scan_config_' . absint( $job_id );
+        return 'ss_scan_config_' . absint( $job_id );
     }
 
     private function has_scan_cache_table() {
@@ -710,7 +710,7 @@ class WP_Security_Pilot_Scanner {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'wpsp_scan_files';
+        $table = $wpdb->prefix . 'ss_scan_files';
         $exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
         $this->scan_cache_table_exists = ( $exists === $table );
 
@@ -723,7 +723,7 @@ class WP_Security_Pilot_Scanner {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'wpsp_scan_files';
+        $table = $wpdb->prefix . 'ss_scan_files';
         return $wpdb->get_row(
             $wpdb->prepare(
                 "SELECT file_hash, file_mtime, last_scanned, last_status
@@ -787,7 +787,7 @@ class WP_Security_Pilot_Scanner {
         }
 
         global $wpdb;
-        $table = $wpdb->prefix . 'wpsp_scan_files';
+        $table = $wpdb->prefix . 'ss_scan_files';
         $wpdb->replace(
             $table,
             array(
@@ -812,7 +812,7 @@ class WP_Security_Pilot_Scanner {
             return;
         }
 
-        if ( wp_next_scheduled( 'wpsp_scan_chunk', array( $job_id ) ) ) {
+        if ( wp_next_scheduled( 'ss_scan_chunk', array( $job_id ) ) ) {
             return;
         }
 
@@ -821,7 +821,7 @@ class WP_Security_Pilot_Scanner {
             return;
         }
 
-        wp_schedule_single_event( time() + 5, 'wpsp_scan_chunk', array( $job_id ) );
+        wp_schedule_single_event( time() + 5, 'ss_scan_chunk', array( $job_id ) );
         $this->kick_cron();
     }
 
@@ -831,7 +831,7 @@ class WP_Security_Pilot_Scanner {
             return;
         }
 
-        $next_scheduled = wp_next_scheduled( 'wpsp_scan_chunk', array( $job_id ) );
+        $next_scheduled = wp_next_scheduled( 'ss_scan_chunk', array( $job_id ) );
         $cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
         $overdue = $next_scheduled && $next_scheduled <= ( time() - 5 );
 
@@ -839,7 +839,7 @@ class WP_Security_Pilot_Scanner {
             return;
         }
 
-        $throttle_key = 'wpsp_scan_inline_' . absint( $job_id );
+        $throttle_key = 'ss_scan_inline_' . absint( $job_id );
         if ( get_transient( $throttle_key ) ) {
             return;
         }
@@ -860,11 +860,11 @@ class WP_Security_Pilot_Scanner {
 
     private function get_scan_config_defaults() {
         return array(
-            'scan_intensity'     => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'scan_intensity' ), 'medium' ),
-            'enable_auto_repair' => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'enable_auto_repair' ), false ),
-            'scan_speed'         => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'scan_speed' ), 3 ),
-            'cache_enabled'      => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'cache_enabled' ), true ),
-            'cache_recheck_days' => WP_Security_Pilot_Settings::get_setting( array( 'scanner', 'cache_recheck_days' ), 30 ),
+            'scan_intensity'     => Saman_Security_Settings::get_setting( array( 'scanner', 'scan_intensity' ), 'medium' ),
+            'enable_auto_repair' => Saman_Security_Settings::get_setting( array( 'scanner', 'enable_auto_repair' ), false ),
+            'scan_speed'         => Saman_Security_Settings::get_setting( array( 'scanner', 'scan_speed' ), 3 ),
+            'cache_enabled'      => Saman_Security_Settings::get_setting( array( 'scanner', 'cache_enabled' ), true ),
+            'cache_recheck_days' => Saman_Security_Settings::get_setting( array( 'scanner', 'cache_recheck_days' ), 30 ),
         );
     }
 
@@ -896,7 +896,7 @@ class WP_Security_Pilot_Scanner {
     }
 
     private function get_lock_key( $job_id ) {
-        return 'wpsp_scan_lock_' . absint( $job_id );
+        return 'ss_scan_lock_' . absint( $job_id );
     }
 
     private function get_chunk_size( $config ) {

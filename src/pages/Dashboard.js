@@ -48,7 +48,7 @@ const Dashboard = () => {
         setIsLoading(true);
         setErrorMessage('');
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/dashboard/summary' });
+            const data = await apiFetch({ path: '/saman-security/v1/dashboard/summary' });
             setSummary({
                 ...defaultSummary,
                 ...data,
@@ -79,7 +79,7 @@ const Dashboard = () => {
         setErrorMessage('');
         try {
             await apiFetch({
-                path: '/wp-security-pilot/v1/scanner/start',
+                path: '/saman-security/v1/scanner/start',
                 method: 'POST',
             });
             await fetchSummary();

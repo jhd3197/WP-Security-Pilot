@@ -42,7 +42,7 @@ const Scanner = () => {
 
     const fetchLatestStatus = useCallback(async () => {
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/scanner/status' });
+            const data = await apiFetch({ path: '/saman-security/v1/scanner/status' });
             if (data?.id) {
                 setJobId(data.id);
             }
@@ -58,7 +58,7 @@ const Scanner = () => {
 
     const fetchStatus = useCallback(async (id) => {
         try {
-            const data = await apiFetch({ path: `/wp-security-pilot/v1/scanner/status/${id}` });
+            const data = await apiFetch({ path: `/saman-security/v1/scanner/status/${id}` });
             setJob({
                 ...initialJobState,
                 ...data,
@@ -73,7 +73,7 @@ const Scanner = () => {
 
     const fetchSchedule = useCallback(async () => {
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/scanner/schedule' });
+            const data = await apiFetch({ path: '/saman-security/v1/scanner/schedule' });
             setSchedule({
                 ...initialSchedule,
                 ...data,
@@ -85,7 +85,7 @@ const Scanner = () => {
 
     const fetchIgnoreList = useCallback(async () => {
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/scanner/ignore' });
+            const data = await apiFetch({ path: '/saman-security/v1/scanner/ignore' });
             const list = Array.isArray(data) ? data : [];
             setIgnoreText(list.join('\n'));
         } catch (error) {
@@ -120,7 +120,7 @@ const Scanner = () => {
         setScanError('');
         try {
             const data = await apiFetch({
-                path: '/wp-security-pilot/v1/scanner/start',
+                path: '/saman-security/v1/scanner/start',
                 method: 'POST',
             });
             setJobId(data.job_id);
@@ -141,7 +141,7 @@ const Scanner = () => {
         setScanError('');
         try {
             await apiFetch({
-                path: `/wp-security-pilot/v1/scanner/stop/${jobId}`,
+                path: `/saman-security/v1/scanner/stop/${jobId}`,
                 method: 'POST',
             });
             await fetchStatus(jobId);
@@ -157,7 +157,7 @@ const Scanner = () => {
         setScheduleError('');
         try {
             const data = await apiFetch({
-                path: '/wp-security-pilot/v1/scanner/schedule',
+                path: '/saman-security/v1/scanner/schedule',
                 method: 'POST',
                 data: schedule,
             });
@@ -181,7 +181,7 @@ const Scanner = () => {
             .filter(Boolean);
         try {
             const data = await apiFetch({
-                path: '/wp-security-pilot/v1/scanner/ignore',
+                path: '/saman-security/v1/scanner/ignore',
                 method: 'POST',
                 data: {
                     patterns,

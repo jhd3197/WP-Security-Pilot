@@ -1,24 +1,28 @@
-# WP Security Pilot
+# Saman Security
 
+<p align="center">  
+  <img width="640" alt="Saman Security" src="https://github.com/user-attachments/assets/195f9018-3104-4406-ad1c-74c159249574" />
+</p>
+  
 <p align="center">
   <strong>The Open Standard for WordPress Security</strong>
 </p>
 
 <p align="center">
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/releases">
-    <img src="https://img.shields.io/github/v/release/jhd3197/WP-Security-Pilot?style=flat-square&color=blue" alt="Latest Release">
+  <a href="https://github.com/SamanLabs/Saman-Security/releases">
+    <img src="https://img.shields.io/github/v/release/SamanLabs/Saman-Security?style=flat-square&color=blue" alt="Latest Release">
   </a>
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/jhd3197/WP-Security-Pilot?style=flat-square&color=green" alt="License">
+  <a href="https://github.com/SamanLabs/Saman-Security/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/SamanLabs/Saman-Security?style=flat-square&color=green" alt="License">
   </a>
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/stargazers">
-    <img src="https://img.shields.io/github/stars/jhd3197/WP-Security-Pilot?style=flat-square&color=yellow" alt="Stars">
+  <a href="https://github.com/SamanLabs/Saman-Security/stargazers">
+    <img src="https://img.shields.io/github/stars/SamanLabs/Saman-Security?style=flat-square&color=yellow" alt="Stars">
   </a>
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/network/members">
-    <img src="https://img.shields.io/github/forks/jhd3197/WP-Security-Pilot?style=flat-square&color=orange" alt="Forks">
+  <a href="https://github.com/SamanLabs/Saman-Security/network/members">
+    <img src="https://img.shields.io/github/forks/SamanLabs/Saman-Security?style=flat-square&color=orange" alt="Forks">
   </a>
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/issues">
-    <img src="https://img.shields.io/github/issues/jhd3197/WP-Security-Pilot?style=flat-square&color=red" alt="Issues">
+  <a href="https://github.com/SamanLabs/Saman-Security/issues">
+    <img src="https://img.shields.io/github/issues/SamanLabs/Saman-Security?style=flat-square&color=red" alt="Issues">
   </a>
 </p>
 
@@ -29,13 +33,13 @@
   <a href="https://php.net/">
     <img src="https://img.shields.io/badge/PHP-7.4%2B-777BB4?style=flat-square&logo=php" alt="PHP Version">
   </a>
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/graphs/contributors">
-    <img src="https://img.shields.io/github/contributors/jhd3197/WP-Security-Pilot?style=flat-square&color=blueviolet" alt="Contributors">
+  <a href="https://github.com/SamanLabs/Saman-Security/graphs/contributors">
+    <img src="https://img.shields.io/github/contributors/SamanLabs/Saman-Security?style=flat-square&color=blueviolet" alt="Contributors">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/jhd3197/WP-Security-Pilot/discussions">
+  <a href="https://github.com/SamanLabs/Saman-Security/discussions">
     <img src="https://img.shields.io/badge/Discussions-Join%20Us-brightgreen?style=flat-square&logo=github" alt="Discussions">
   </a>
 </p>
@@ -50,7 +54,7 @@
 
 For too long, WordPress security has been dominated by proprietary solutions that operate as black boxes. Each plugin guards its methods as trade secrets, fragmenting the ecosystem and forcing developers to work around opaque systems.
 
-**WP Security Pilot takes a different approach**: We believe the security industry benefits from transparency, shared standards, and collaborative improvement. By open-sourcing our complete security workflow, we're establishing a foundation that the entire WordPress community can build upon, inspect, and enhance.
+**Saman Security takes a different approach**: We believe the security industry benefits from transparency, shared standards, and collaborative improvement. By open-sourcing our complete security workflow, we're establishing a foundation that the entire WordPress community can build upon, inspect, and enhance.
 
 This is security without secrets—because better security comes from better collaboration, not better secrecy.
 
@@ -101,17 +105,17 @@ This is security without secrets—because better security comes from better col
 ### Installation
 
 1. Download the latest release or clone this repository
-2. Upload to `/wp-content/plugins/wp-security-pilot/`
+2. Upload to `/wp-content/plugins/saman-security/`
 3. Activate through the WordPress admin interface
-4. Navigate to **WP Security Pilot → Dashboard** to configure site-wide settings and review security status.
+4. Navigate to **Saman Security → Dashboard** to configure site-wide settings and review security status.
 
 ### Basic Usage
 
 **Dashboard Overview:**
-Navigate to **WP Security Pilot → Dashboard** to see a summary of your site's security status, recent activity, and any pending issues.
+Navigate to **Saman Security → Dashboard** to see a summary of your site's security status, recent activity, and any pending issues.
 
 **Security Hardening:**
-Go to **WP Security Pilot → Hardening** to enable recommended security measures like disabling XML-RPC or preventing file editing.
+Go to **Saman Security → Hardening** to enable recommended security measures like disabling XML-RPC or preventing file editing.
 
 ---
 
@@ -121,7 +125,7 @@ Go to **WP Security Pilot → Hardening** to enable recommended security measure
 
 ```php
 // Perform an action after a security event is logged
-add_action( 'wp_security_pilot_security_event_logged', function( $event_data ) {
+add_action( 'saman_security_event_logged', function( $event_data ) {
     // Send an email, trigger a webhook, etc.
     error_log( 'Security event detected: ' . print_r( $event_data, true ) );
 }, 10, 1 );
@@ -131,7 +135,7 @@ add_action( 'wp_security_pilot_security_event_logged', function( $event_data ) {
 
 ```php
 // Modify a firewall rule dynamically
-add_filter( 'wp_security_pilot_firewall_rule', function( $rule, $request ) {
+add_filter( 'saman_security_firewall_rule', function( $rule, $request ) {
     // Add an exception for a specific IP
     if ( $request['ip'] === '192.168.1.1' ) {
         $rule['action'] = 'allow';
@@ -140,7 +144,7 @@ add_filter( 'wp_security_pilot_firewall_rule', function( $rule, $request ) {
 }, 10, 2 );
 
 // Customize file scan exclusion paths
-add_filter( 'wp_security_pilot_scan_exclude_paths', function( $excluded_paths ) {
+add_filter( 'saman_security_scan_exclude_paths', function( $excluded_paths ) {
     $excluded_paths[] = ABSPATH . 'wp-content/uploads/custom-safe-folder/';
     return $excluded_paths;
 }, 10, 1 );
@@ -154,13 +158,13 @@ For comprehensive filter documentation, see **[docs/FILTERS.md](docs/FILTERS.md)
 
 ```bash
 # List all detected security issues
-wp wpsecuritypilot issues list --format=table
+wp samansecurity issues list --format=table
 
 # Run a manual file scan
-wp wpsecuritypilot scan files
+wp samansecurity scan files
 
 # Enable a specific hardening option
-wp wpsecuritypilot hardening enable xml-rpc-disable
+wp samansecurity hardening enable xml-rpc-disable
 ```
 
 Full WP-CLI documentation: **[docs/WP_CLI.md](docs/WP_CLI.md)**
@@ -178,7 +182,7 @@ See **[CONTRIBUTING.md](CONTRIBUTING.md)** for guidelines.
 ## Privacy & Security
 
 - **Activity Logging**: Opt-in feature that stores only necessary security event data.
-- **No Telemetry**: Zero external tracking or analytics by default.
+- **Usage Analytics**: Anonymous admin-only usage analytics with an opt-out toggle.
 - **No External Requests**: All core processing happens on your server (except for optional cloud-based threat intelligence if explicitly enabled).
 
 ---
@@ -202,15 +206,21 @@ npm run start
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/jhd3197/WP-Security-Pilot/issues)
+- **Issues**: [GitHub Issues](https://github.com/SamanLabs/Saman-Security/issues)
 - **Documentation**: [Full Documentation](docs/)
-- **Community**: [Discussions](https://github.com/jhd3197/WP-Security-Pilot/discussions)
+- **Community**: [Discussions](https://github.com/SamanLabs/Saman-Security/discussions)
 
 ---
 
 ## See Also
 
-- [WP-SEO-Pilot](https://github.com/jhd3197/WP-SEO-Pilot) - A comprehensive, transparent SEO solution for WordPress.
+- [Saman SEO](https://github.com/SamanLabs/Saman-SEO) - A comprehensive, transparent SEO solution for WordPress.
+- [Saman AI](https://github.com/SamanLabs/Saman-AI) - An advanced AI-powered assistant for WordPress.
+- [Saman Backup](https://github.com/SamanLabs/Saman-Backup) - Reliable backup and restore solution for WordPress.
+- [Saman Field](https://github.com/SamanLabs/Saman-Field) - A flexible custom fields solution for WordPress.
+- [Saman Cache](https://github.com/SamanLabs/Saman-Cache) - A powerful caching solution for WordPress.
+- [Saman Forms](https://github.com/SamanLabs/Saman-Forms) - An intuitive form builder for WordPress.
+
 
 ---
 

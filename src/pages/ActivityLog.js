@@ -14,7 +14,7 @@ const ActivityLog = () => {
         setErrorMessage('');
         const query = search ? `?search=${encodeURIComponent(search)}` : '';
         try {
-            const data = await apiFetch({ path: `/wp-security-pilot/v1/activity/logs${query}` });
+            const data = await apiFetch({ path: `/saman-security/v1/activity/logs${query}` });
             setLogs(Array.isArray(data) ? data : []);
         } catch (error) {
             setErrorMessage(error?.message || 'Unable to load activity logs.');
@@ -64,14 +64,14 @@ const ActivityLog = () => {
         const query = activeFilter ? `?search=${encodeURIComponent(activeFilter)}` : '';
         try {
             const response = await apiFetch({
-                path: `/wp-security-pilot/v1/activity/logs/export${query}`,
+                path: `/saman-security/v1/activity/logs/export${query}`,
                 parse: false,
             });
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'wp-security-pilot-activity-log.csv';
+            link.download = 'saman-security-activity-log.csv';
             document.body.appendChild(link);
             link.click();
             link.remove();

@@ -1,10 +1,10 @@
 # Hardening Options
 
-This guide provides information on the best practices for securing your WordPress site with WP Security Pilot.
+This guide provides information on the best practices for securing your WordPress site with Saman Security.
 
 ## Available Options
 
-The following hardening options are available in WP Security Pilot:
+The following hardening options are available in Saman Security:
 
 -   **Disable XML-RPC**: Disables the XML-RPC API.
 -   **Disable File Editor**: Disables the file editor in the WordPress admin.

@@ -3,10 +3,10 @@
  * Updater REST Controller
  */
 
-class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
+class Saman_Security_Updater_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'updater';
     }
 
@@ -66,18 +66,18 @@ class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
     }
 
     public function get_plugins() {
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         return rest_ensure_response( $updater->get_plugins_status() );
     }
 
     public function check_updates() {
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         return rest_ensure_response( $updater->force_check_updates() );
     }
 
     public function install_plugin( $request ) {
         $slug = $request->get_param( 'slug' );
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         $plugins = $updater->get_plugins_status();
 
         if ( ! isset( $plugins[ $slug ] ) ) {
@@ -90,7 +90,7 @@ class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
             return new WP_Error( 'already_installed', 'Plugin is already installed' );
         }
 
-        $result = WP_Security_Pilot_Plugin_Installer::install(
+        $result = Saman_Security_Plugin_Installer::install(
             $plugin['download_url'],
             $plugin['plugin_file']
         );
@@ -100,7 +100,7 @@ class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
 
     public function update_plugin( $request ) {
         $slug = $request->get_param( 'slug' );
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         $plugins = $updater->get_plugins_status();
 
         if ( ! isset( $plugins[ $slug ] ) ) {
@@ -113,35 +113,35 @@ class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
             return new WP_Error( 'no_update', 'No update available' );
         }
 
-        $result = WP_Security_Pilot_Plugin_Installer::update( $plugin['plugin_file'] );
+        $result = Saman_Security_Plugin_Installer::update( $plugin['plugin_file'] );
 
         return rest_ensure_response( $result );
     }
 
     public function activate_plugin( $request ) {
         $slug = $request->get_param( 'slug' );
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         $plugins = $updater->get_plugins_status();
 
         if ( ! isset( $plugins[ $slug ] ) ) {
             return new WP_Error( 'invalid_plugin', 'Plugin not found' );
         }
 
-        $result = WP_Security_Pilot_Plugin_Installer::activate( $plugins[ $slug ]['plugin_file'] );
+        $result = Saman_Security_Plugin_Installer::activate( $plugins[ $slug ]['plugin_file'] );
 
         return rest_ensure_response( $result );
     }
 
     public function deactivate_plugin( $request ) {
         $slug = $request->get_param( 'slug' );
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         $plugins = $updater->get_plugins_status();
 
         if ( ! isset( $plugins[ $slug ] ) ) {
             return new WP_Error( 'invalid_plugin', 'Plugin not found' );
         }
 
-        $result = WP_Security_Pilot_Plugin_Installer::deactivate( $plugins[ $slug ]['plugin_file'] );
+        $result = Saman_Security_Plugin_Installer::deactivate( $plugins[ $slug ]['plugin_file'] );
 
         return rest_ensure_response( $result );
     }
@@ -150,7 +150,7 @@ class WP_Security_Pilot_Updater_Controller extends WP_REST_Controller {
         $slug = $request->get_param( 'slug' );
         $enabled = $request->get_param( 'enabled' );
 
-        $updater = WP_Security_Pilot_GitHub_Updater::get_instance();
+        $updater = Saman_Security_GitHub_Updater::get_instance();
         $plugins = $updater->get_plugins_status();
 
         if ( ! isset( $plugins[ $slug ] ) ) {

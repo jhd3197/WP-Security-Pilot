@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Hardening_Controller extends WP_REST_Controller {
+class Saman_Security_Hardening_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'hardening';
     }
 
@@ -39,30 +39,30 @@ class WP_Security_Pilot_Hardening_Controller extends WP_REST_Controller {
     }
 
     public function get_item( $request ) {
-        return rest_ensure_response( WP_Security_Pilot_Hardening::get_settings() );
+        return rest_ensure_response( Saman_Security_Hardening::get_settings() );
     }
 
     public function update_item( $request ) {
         $params = $request->get_json_params();
-        $sanitized = WP_Security_Pilot_Hardening::sanitize_settings( $params );
+        $sanitized = Saman_Security_Hardening::sanitize_settings( $params );
         $sanitized['updated_at'] = current_time( 'mysql' );
 
-        update_option( WP_Security_Pilot_Hardening::OPTION_KEY, $sanitized );
+        update_option( Saman_Security_Hardening::OPTION_KEY, $sanitized );
 
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-            WP_Security_Pilot_Activity_Logger::log_event( 'allowed', 'Hardening rules updated', get_current_user_id() );
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+            Saman_Security_Activity_Logger::log_event( 'allowed', 'Hardening rules updated', get_current_user_id() );
         }
 
         return rest_ensure_response( $sanitized );
     }
 
     public function export_item( $request ) {
-        $settings = WP_Security_Pilot_Hardening::get_settings();
+        $settings = Saman_Security_Hardening::get_settings();
         $json = wp_json_encode( $settings, JSON_PRETTY_PRINT );
 
         $response = new WP_REST_Response( $json );
         $response->header( 'Content-Type', 'application/json; charset=utf-8' );
-        $response->header( 'Content-Disposition', 'attachment; filename=wp-security-pilot-hardening.json' );
+        $response->header( 'Content-Disposition', 'attachment; filename=saman-security-hardening.json' );
 
         return $response;
     }

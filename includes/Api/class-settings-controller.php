@@ -1,9 +1,9 @@
 <?php
 
-class WP_Security_Pilot_Settings_Controller extends WP_REST_Controller {
+class Saman_Security_Settings_Controller extends WP_REST_Controller {
 
     public function __construct() {
-        $this->namespace = 'wp-security-pilot/v1';
+        $this->namespace = 'saman-security/v1';
         $this->rest_base = 'settings';
     }
 
@@ -51,12 +51,12 @@ class WP_Security_Pilot_Settings_Controller extends WP_REST_Controller {
     }
 
     public function get_items( $request ) {
-        return rest_ensure_response( WP_Security_Pilot_Settings::get_settings() );
+        return rest_ensure_response( Saman_Security_Settings::get_settings() );
     }
 
     public function create_item( $request ) {
         $params = $request->get_json_params();
-        $settings = WP_Security_Pilot_Settings::update_settings( $params );
+        $settings = Saman_Security_Settings::update_settings( $params );
         return rest_ensure_response( $settings );
     }
 
@@ -64,14 +64,14 @@ class WP_Security_Pilot_Settings_Controller extends WP_REST_Controller {
         $params = $request->get_json_params();
         $label = isset( $params['label'] ) ? $params['label'] : '';
 
-        $data = WP_Security_Pilot_Settings::generate_api_key( $label );
+        $data = Saman_Security_Settings::generate_api_key( $label );
 
         return rest_ensure_response( $data );
     }
 
     public function delete_api_key( $request ) {
         $prefix = $request['prefix'];
-        $keys = WP_Security_Pilot_Settings::revoke_api_key( $prefix );
+        $keys = Saman_Security_Settings::revoke_api_key( $prefix );
 
         return rest_ensure_response( $keys );
     }

@@ -36,7 +36,7 @@ jobs:
       - name: Extract version from plugin file
         id: get_version
         run: |
-          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" wp-security-pilot.php | head -1)
+          VERSION=$(grep -oP "^\s*\*\s*Version:\s*\K[\d.]+" saman-security.php | head -1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Base version: $VERSION"
 
@@ -91,23 +91,23 @@ jobs:
       - name: Create plugin zip
         run: |
           # Create temp directory for clean plugin
-          mkdir -p wp-security-pilot
+          mkdir -p saman-security
 
           # Copy only production files
-          cp -r assets wp-security-pilot/
-          cp -r includes wp-security-pilot/
-          cp -r languages wp-security-pilot/ 2>/dev/null || mkdir -p wp-security-pilot/languages
-          cp wp-security-pilot.php wp-security-pilot/
-          cp readme.txt wp-security-pilot/ 2>/dev/null || true
-          cp LICENSE wp-security-pilot/ 2>/dev/null || true
+          cp -r assets saman-security/
+          cp -r includes saman-security/
+          cp -r languages saman-security/ 2>/dev/null || mkdir -p saman-security/languages
+          cp saman-security.php saman-security/
+          cp readme.txt saman-security/ 2>/dev/null || true
+          cp LICENSE saman-security/ 2>/dev/null || true
 
           # Create the zip
-          zip -r wp-security-pilot-${{ steps.beta_number.outputs.zip_version }}.zip wp-security-pilot
+          zip -r saman-security-${{ steps.beta_number.outputs.zip_version }}.zip saman-security
 
           # Cleanup
-          rm -rf wp-security-pilot
+          rm -rf saman-security
 
-          echo "Created wp-security-pilot-${{ steps.beta_number.outputs.zip_version }}.zip"
+          echo "Created saman-security-${{ steps.beta_number.outputs.zip_version }}.zip"
 
       - name: Prepare release notes
         id: release_notes
@@ -126,8 +126,8 @@ jobs:
             echo "$DESCRIPTION"
             echo ""
             echo "### How to Install"
-            echo "1. Go to **Security Pilot → Connected Plugins**"
-            echo "2. Enable **Beta versions** for WP Security Pilot"
+            echo "1. Go to **Saman Security → Connected Plugins**"
+            echo "2. Enable **Beta versions** for Saman Security"
             echo "3. Click **Update** to install this beta"
             echo ""
             echo "### Feedback"
@@ -145,11 +145,11 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ steps.beta_number.outputs.tag }}
-          name: WP Security Pilot ${{ steps.beta_number.outputs.beta_version }} (Beta)
+          name: Saman Security ${{ steps.beta_number.outputs.beta_version }} (Beta)
           body_path: release_notes.md
           draft: false
           prerelease: true
-          files: wp-security-pilot-${{ steps.beta_number.outputs.zip_version }}.zip
+          files: saman-security-${{ steps.beta_number.outputs.zip_version }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -159,4 +159,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "- **Version:** ${{ steps.beta_number.outputs.beta_version }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tag:** ${{ steps.beta_number.outputs.tag }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Zip:** wp-security-pilot-${{ steps.beta_number.outputs.zip_version }}.zip" >> $GITHUB_STEP_SUMMARY
+          echo "- **Zip:** saman-security-${{ steps.beta_number.outputs.zip_version }}.zip" >> $GITHUB_STEP_SUMMARY

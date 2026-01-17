@@ -1,6 +1,6 @@
 <?php
 
-class WP_Security_Pilot_Firewall {
+class Saman_Security_Firewall {
     public function run() {
         if ( defined( 'WP_CLI' ) && WP_CLI ) {
             return;
@@ -88,7 +88,7 @@ class WP_Security_Pilot_Firewall {
     private function is_ip_listed( $ip_address, $list_type ) {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wpsp_ip_list';
+        $table_name = $wpdb->prefix . 'ss_ip_list';
         $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
         if ( $table_exists !== $table_name ) {
             return false;
@@ -107,7 +107,7 @@ class WP_Security_Pilot_Firewall {
     }
 
     private function is_geo_blocked( $ip_address ) {
-        $blocked_countries = get_option( 'wpsp_blocked_countries', array() );
+        $blocked_countries = get_option( 'ss_blocked_countries', array() );
         if ( empty( $blocked_countries ) || ! is_array( $blocked_countries ) ) {
             return false;
         }
@@ -121,14 +121,14 @@ class WP_Security_Pilot_Firewall {
     }
 
     private function resolve_country_code( $ip_address ) {
-        $country_code = apply_filters( 'wpsp_firewall_country_code', '', $ip_address );
+        $country_code = apply_filters( 'saman_security_firewall_country_code', '', $ip_address );
         if ( ! empty( $country_code ) ) {
             return $country_code;
         }
 
-        if ( class_exists( '\\GeoIp2\\Database\\Reader' ) && defined( 'WP_SECURITY_PILOT_GEOIP_DB' ) ) {
+        if ( class_exists( '\\GeoIp2\\Database\\Reader' ) && defined( 'SAMAN_SECURITY_GEOIP_DB' ) ) {
             try {
-                $reader = new \GeoIp2\Database\Reader( WP_SECURITY_PILOT_GEOIP_DB );
+                $reader = new \GeoIp2\Database\Reader( SAMAN_SECURITY_GEOIP_DB );
                 $record = $reader->country( $ip_address );
                 return $record->country->isoCode;
             } catch ( Exception $exception ) {
@@ -142,7 +142,7 @@ class WP_Security_Pilot_Firewall {
     private function check_traffic_rules() {
         global $wpdb;
 
-        $table_name = $wpdb->prefix . 'wpsp_firewall_rules';
+        $table_name = $wpdb->prefix . 'ss_firewall_rules';
         $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
         if ( $table_exists !== $table_name ) {
             return null;
@@ -186,9 +186,9 @@ class WP_Security_Pilot_Firewall {
     }
 
     private function record_rate_limit_hit( $ip_address ) {
-        $threshold = (int) WP_Security_Pilot_Settings::get_setting( array( 'firewall', 'ratelimit_threshold' ), 10 );
-        $period = (int) WP_Security_Pilot_Settings::get_setting( array( 'firewall', 'ratelimit_period_seconds' ), 60 );
-        $duration = (int) WP_Security_Pilot_Settings::get_setting( array( 'firewall', 'autoblock_duration_minutes' ), 60 );
+        $threshold = (int) Saman_Security_Settings::get_setting( array( 'firewall', 'ratelimit_threshold' ), 10 );
+        $period = (int) Saman_Security_Settings::get_setting( array( 'firewall', 'ratelimit_period_seconds' ), 60 );
+        $duration = (int) Saman_Security_Settings::get_setting( array( 'firewall', 'autoblock_duration_minutes' ), 60 );
 
         if ( $threshold <= 0 || $period <= 0 || $duration <= 0 ) {
             return;
@@ -217,10 +217,10 @@ class WP_Security_Pilot_Firewall {
 
         if ( $data['count'] >= $threshold ) {
             set_transient( $this->get_autoblock_key( $ip_address ), 1, $duration * MINUTE_IN_SECONDS );
-            if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
-                WP_Security_Pilot_Activity_Logger::log_event( 'blocked', 'Firewall auto-block triggered', 0, $ip_address );
+            if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
+                Saman_Security_Activity_Logger::log_event( 'blocked', 'Firewall auto-block triggered', 0, $ip_address );
             }
-            WP_Security_Pilot_Notifications::send_alert(
+            Saman_Security_Notifications::send_alert(
                 'firewall_block',
                 'Firewall auto-block triggered due to repeated rule matches.',
                 array( 'ip' => $ip_address )
@@ -310,15 +310,15 @@ class WP_Security_Pilot_Firewall {
     }
 
     private function block_request( $reason, $ip_address, $rule_match = array() ) {
-        if ( class_exists( 'WP_Security_Pilot_Activity_Logger' ) ) {
+        if ( class_exists( 'Saman_Security_Activity_Logger' ) ) {
             $message = $reason;
             if ( ! empty( $rule_match['description'] ) ) {
                 $message = sprintf( 'Firewall rule matched: %s', $rule_match['description'] );
             }
-            WP_Security_Pilot_Activity_Logger::log_event( 'blocked', $message, 0, $ip_address );
+            Saman_Security_Activity_Logger::log_event( 'blocked', $message, 0, $ip_address );
         }
 
-        WP_Security_Pilot_Notifications::send_alert(
+        Saman_Security_Notifications::send_alert(
             'firewall_block',
             $reason,
             array(
@@ -328,18 +328,18 @@ class WP_Security_Pilot_Firewall {
         );
 
         wp_die(
-            esc_html__( 'You are blocked from accessing this site.', 'wp-security-pilot' ),
-            esc_html__( 'Access denied', 'wp-security-pilot' ),
+            esc_html__( 'You are blocked from accessing this site.', 'saman-security' ),
+            esc_html__( 'Access denied', 'saman-security' ),
             array( 'response' => 403 )
         );
     }
 
     private function get_rate_limit_key( $ip_address ) {
-        return 'wpsp_fw_hits_' . md5( $ip_address );
+        return 'ss_fw_hits_' . md5( $ip_address );
     }
 
     private function get_autoblock_key( $ip_address ) {
-        return 'wpsp_fw_autoblock_' . md5( $ip_address );
+        return 'ss_fw_autoblock_' . md5( $ip_address );
     }
 
     private function get_client_ip() {

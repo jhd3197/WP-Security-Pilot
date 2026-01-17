@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-class WP_Security_Pilot_GitHub_Updater {
+class Saman_Security_GitHub_Updater {
 
     /**
      * Managed plugins configuration
@@ -35,7 +35,7 @@ class WP_Security_Pilot_GitHub_Updater {
     /**
      * Option key for beta preferences
      */
-    private const BETA_OPTION_KEY = 'wpsp_beta_plugins';
+    private const BETA_OPTION_KEY = 'ss_beta_plugins';
 
     /**
      * Singleton instance
@@ -65,37 +65,37 @@ class WP_Security_Pilot_GitHub_Updater {
      */
     private function register_plugins() {
         $this->plugins = [
-            'WP-Security-Pilot/wp-security-pilot.php' => [
-                'slug'        => 'wp-security-pilot',
-                'repo'        => 'jhd3197/WP-Security-Pilot',
-                'name'        => 'WP Security Pilot',
-                'description' => 'Open standard security for WordPress',
-                'icon'        => 'https://raw.githubusercontent.com/jhd3197/WP-Security-Pilot/main/assets/icon-128.png',
-                'banner'      => 'https://raw.githubusercontent.com/jhd3197/WP-Security-Pilot/main/assets/banner-772x250.png',
+            'Saman-Security/saman-security.php' => [
+                'slug'        => 'saman-security',
+                'repo'        => 'SamanLabs/Saman-Security',
+                'name'        => 'Saman Security',
+                'description' => 'Core security suite with firewall, malware scans, and hardening',
+                'icon'        => 'https://raw.githubusercontent.com/SamanLabs/Saman-Security/main/assets/images/icon-128.png',
+                'banner'      => 'https://raw.githubusercontent.com/SamanLabs/Saman-Security/main/assets/images/banner-772x250.png',
                 'type'        => 'security',
             ],
-            'WP-AI-Pilot/wp-ai-pilot.php' => [
-                'slug'        => 'wp-ai-pilot',
-                'repo'        => 'jhd3197/WP-AI-Pilot',
-                'name'        => 'WP AI Pilot',
+            'Saman-AI/saman-ai.php' => [
+                'slug'        => 'saman-ai',
+                'repo'        => 'SamanLabs/Saman-AI',
+                'name'        => 'Saman AI',
                 'description' => 'Centralized AI management for WordPress',
-                'icon'        => 'https://raw.githubusercontent.com/jhd3197/WP-AI-Pilot/main/assets/icon-128.png',
-                'banner'      => 'https://raw.githubusercontent.com/jhd3197/WP-AI-Pilot/main/assets/banner-772x250.png',
+                'icon'        => 'https://raw.githubusercontent.com/SamanLabs/Saman-AI/main/assets/images/icon-128.png',
+                'banner'      => 'https://raw.githubusercontent.com/SamanLabs/Saman-AI/main/assets/images/banner-772x250.png',
                 'type'        => 'ai',
             ],
-            'WP-SEO-Pilot/wp-seo-pilot.php' => [
-                'slug'        => 'wp-seo-pilot',
-                'repo'        => 'jhd3197/WP-SEO-Pilot',
-                'name'        => 'WP SEO Pilot',
+            'Saman-SEO/saman-seo.php' => [
+                'slug'        => 'saman-seo',
+                'repo'        => 'SamanLabs/Saman-SEO',
+                'name'        => 'Saman SEO',
                 'description' => 'AI-powered SEO optimization for WordPress',
-                'icon'        => 'https://raw.githubusercontent.com/jhd3197/WP-SEO-Pilot/main/assets/icon-128.png',
-                'banner'      => 'https://raw.githubusercontent.com/jhd3197/WP-SEO-Pilot/main/assets/banner-772x250.png',
+                'icon'        => 'https://raw.githubusercontent.com/SamanLabs/Saman-SEO/main/assets/images/icon-128.png',
+                'banner'      => 'https://raw.githubusercontent.com/SamanLabs/Saman-SEO/main/assets/images/banner-772x250.png',
                 'type'        => 'seo',
             ],
         ];
 
         // Allow filtering
-        $this->plugins = apply_filters( 'wp_security_pilot_managed_plugins', $this->plugins );
+        $this->plugins = apply_filters( 'saman_security_managed_plugins', $this->plugins );
     }
 
     /**
@@ -112,11 +112,11 @@ class WP_Security_Pilot_GitHub_Updater {
         add_filter( 'upgrader_source_selection', [ $this, 'fix_folder_name' ], 10, 4 );
 
         // Daily cron check
-        add_action( 'wp_security_pilot_check_updates', [ $this, 'cron_check_updates' ] );
+        add_action( 'saman_security_check_updates', [ $this, 'cron_check_updates' ] );
 
         // Schedule cron if not scheduled
-        if ( ! wp_next_scheduled( 'wp_security_pilot_check_updates' ) ) {
-            wp_schedule_event( time(), 'daily', 'wp_security_pilot_check_updates' );
+        if ( ! wp_next_scheduled( 'saman_security_check_updates' ) ) {
+            wp_schedule_event( time(), 'daily', 'saman_security_check_updates' );
         }
     }
 
@@ -150,7 +150,7 @@ class WP_Security_Pilot_GitHub_Updater {
         // Clear beta cache when preference changes
         foreach ( $this->plugins as $plugin_file => $plugin_data ) {
             if ( $plugin_data['slug'] === $slug ) {
-                delete_transient( 'wpsp_gh_beta_' . md5( $plugin_data['repo'] ) );
+                delete_transient( 'ss_gh_beta_' . md5( $plugin_data['repo'] ) );
                 break;
             }
         }
@@ -211,7 +211,7 @@ class WP_Security_Pilot_GitHub_Updater {
      * Get remote version from GitHub (stable releases only)
      */
     public function get_remote_version( string $repo ): ?array {
-        $cache_key = 'wpsp_gh_' . md5( $repo );
+        $cache_key = 'ss_gh_' . md5( $repo );
         $cached = get_transient( $cache_key );
 
         if ( false !== $cached ) {
@@ -223,7 +223,7 @@ class WP_Security_Pilot_GitHub_Updater {
         $response = wp_remote_get( $url, [
             'headers' => [
                 'Accept' => 'application/vnd.github.v3+json',
-                'User-Agent' => 'WP-Security-Pilot-Updater',
+                'User-Agent' => 'Saman-Security-Updater',
             ],
             'timeout' => 10,
         ] );
@@ -275,7 +275,7 @@ class WP_Security_Pilot_GitHub_Updater {
      * Get latest beta/prerelease version from GitHub
      */
     public function get_beta_version( string $repo ): ?array {
-        $cache_key = 'wpsp_gh_beta_' . md5( $repo );
+        $cache_key = 'ss_gh_beta_' . md5( $repo );
         $cached = get_transient( $cache_key );
 
         if ( false !== $cached ) {
@@ -288,7 +288,7 @@ class WP_Security_Pilot_GitHub_Updater {
         $response = wp_remote_get( $url, [
             'headers' => [
                 'Accept' => 'application/vnd.github.v3+json',
-                'User-Agent' => 'WP-Security-Pilot-Updater',
+                'User-Agent' => 'Saman-Security-Updater',
             ],
             'timeout' => 10,
         ] );
@@ -390,12 +390,12 @@ class WP_Security_Pilot_GitHub_Updater {
             'name'          => $plugin_data['name'],
             'slug'          => $plugin_data['slug'],
             'version'       => $remote['version'],
-            'author'        => '<a href="https://github.com/jhd3197">Juan Denis</a>',
-            'author_profile'=> 'https://github.com/jhd3197',
+            'author'        => '<a href="https://samanlabs.com/">SamanLabs</a>',
+            'author_profile'=> 'https://samanlabs.com/SamanLabs',
             'requires'      => '5.0',
             'tested'        => get_bloginfo( 'version' ),
             'requires_php'  => '7.4',
-            'homepage'      => 'https://github.com/' . $plugin_data['repo'],
+            'homepage'      => 'https://github.com/SamanLabs/',
             'download_link' => $remote['download_url'],
             'trunk'         => $remote['download_url'],
             'last_updated'  => $remote['published_at'],
@@ -472,8 +472,8 @@ class WP_Security_Pilot_GitHub_Updater {
     public function cron_check_updates() {
         // Clear transients to force fresh check
         foreach ( $this->plugins as $plugin_file => $plugin_data ) {
-            delete_transient( 'wpsp_gh_' . md5( $plugin_data['repo'] ) );
-            delete_transient( 'wpsp_gh_beta_' . md5( $plugin_data['repo'] ) );
+            delete_transient( 'ss_gh_' . md5( $plugin_data['repo'] ) );
+            delete_transient( 'ss_gh_beta_' . md5( $plugin_data['repo'] ) );
         }
 
         // Trigger WordPress update check
@@ -489,8 +489,8 @@ class WP_Security_Pilot_GitHub_Updater {
 
         foreach ( $this->plugins as $plugin_file => $plugin_data ) {
             // Clear cache
-            delete_transient( 'wpsp_gh_' . md5( $plugin_data['repo'] ) );
-            delete_transient( 'wpsp_gh_beta_' . md5( $plugin_data['repo'] ) );
+            delete_transient( 'ss_gh_' . md5( $plugin_data['repo'] ) );
+            delete_transient( 'ss_gh_beta_' . md5( $plugin_data['repo'] ) );
 
             // Get fresh versions
             $remote = $this->get_remote_version( $plugin_data['repo'] );

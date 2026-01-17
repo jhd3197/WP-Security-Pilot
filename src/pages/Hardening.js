@@ -47,7 +47,7 @@ const Hardening = () => {
         setIsLoading(true);
         setErrorMessage('');
         try {
-            const data = await apiFetch({ path: '/wp-security-pilot/v1/hardening' });
+            const data = await apiFetch({ path: '/saman-security/v1/hardening' });
             const merged = {
                 ...defaultSettings,
                 ...data,
@@ -113,7 +113,7 @@ const Hardening = () => {
 
         try {
             const data = await apiFetch({
-                path: '/wp-security-pilot/v1/hardening',
+                path: '/saman-security/v1/hardening',
                 method: 'POST',
                 data: payload,
             });
@@ -150,14 +150,14 @@ const Hardening = () => {
         setErrorMessage('');
         try {
             const response = await apiFetch({
-                path: '/wp-security-pilot/v1/hardening/export',
+                path: '/saman-security/v1/hardening/export',
                 parse: false,
             });
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'wp-security-pilot-hardening.json';
+            link.download = 'saman-security-hardening.json';
             document.body.appendChild(link);
             link.click();
             link.remove();
