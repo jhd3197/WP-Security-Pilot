@@ -1,5 +1,9 @@
 # Saman Security
 
+<p align="center">  
+  <img width="640" alt="Saman Security" src="https://github.com/user-attachments/assets/195f9018-3104-4406-ad1c-74c159249574" />
+</p>
+  
 <p align="center">
   <strong>The Open Standard for WordPress Security</strong>
 </p>
